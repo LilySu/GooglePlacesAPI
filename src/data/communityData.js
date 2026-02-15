@@ -81,6 +81,7 @@ export const initialChatMessages = [
     category: 'meal',
     text: 'Maya logged a meal: Mediterranean Mezze Platter at Daphne\'s — anti-inflammatory',
     time: 'Yesterday, 1:30 PM',
+    imageKey: 'mezze',
   },
   {
     id: 'match-3',

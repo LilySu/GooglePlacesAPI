@@ -6,10 +6,12 @@ import { SESSION_LIST } from '../data/sessions';
 import { initialChatMessages } from '../data/communityData';
 import gentleFlowImg from '@assets/dane-wetton-t1NEMSm1rgI-unsplash_1771111922313_1771120987645.jpg';
 import partnerChallengeImg from '@assets/jessica-streser-5ai6kpW4NOw-unsplash_1771111996592_1771120987644.jpg';
+import mezzeImg from '@assets/prakash-rao-5NEXE6dfEG0-unsplash_1771137975530.jpg';
 
 const MESSAGE_IMAGES = {
   gentleFlow: gentleFlowImg,
   partnerChallenge: partnerChallengeImg,
+  mezze: mezzeImg,
 };
 
 function getTrajectoryChartData(sessionData) {
@@ -73,7 +75,9 @@ function MessageBubble({ message }) {
                 <img
                   src={MESSAGE_IMAGES[message.imageKey]}
                   alt=""
-                  className="w-full h-36 object-cover rounded-xl mt-2 border border-purple-200/40"
+                  className={`w-full h-36 object-cover rounded-xl mt-2 border ${
+                    isMeal ? 'border-amber-200/40' : 'border-purple-200/40'
+                  }`}
                 />
               )}
               <p className="text-[10px] opacity-50 mt-1">{message.time}</p>
@@ -102,7 +106,7 @@ function MessageBubble({ message }) {
   );
 }
 
-export default function MessagingPortal({ matchedUser, sessionData, onBack }) {
+export default function MessagingPortal({ matchedUser, sessionData, onBack, currentSession, setCurrentSession }) {
   const [messages, setMessages] = useState(initialChatMessages);
   const [inputText, setInputText] = useState('');
 
@@ -128,26 +132,42 @@ export default function MessagingPortal({ matchedUser, sessionData, onBack }) {
 
   return (
     <div className="space-y-4 animate-fadeInUp">
-      <button
-        onClick={onBack}
-        className="flex items-center gap-2 text-sm text-purple-600 hover:text-purple-800 transition-colors font-medium"
-        style={{fontFamily: 'Work Sans, sans-serif'}}
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to Dashboard
-      </button>
+      <div className="flex justify-center gap-2 mb-2">
+        {SESSION_LIST.map(s => (
+          <button
+            key={s.key}
+            onClick={() => setCurrentSession(s.key)}
+            title={s.fullLabel}
+            className={`px-3.5 py-2 rounded-full text-sm font-medium transition-all ${
+              currentSession === s.key
+                ? 'bg-amber-600 text-white'
+                : 'bg-white/60 text-amber-700 hover:bg-white/80'
+            }`}
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
 
       <div className="bg-gradient-to-r from-purple-100/80 to-rose-100/80 rounded-3xl p-5 border border-purple-200/50">
         <div className="flex items-center gap-4 mb-1">
           <div className="w-12 h-12 bg-gradient-to-br from-purple-200 to-rose-200 rounded-2xl flex items-center justify-center text-xl">
             {matchedUser.avatar}
           </div>
-          <div>
+          <div className="flex-1">
             <h3 className="text-lg font-semibold text-amber-900" style={{fontFamily: 'Spectral, serif'}}>
               {matchedUser.name}
             </h3>
             <p className="text-xs text-purple-500">{matchedUser.distance} · {matchedUser.similarityScore}% trajectory match</p>
           </div>
+          <button
+            onClick={onBack}
+            className="flex items-center gap-1.5 text-xs text-purple-600 hover:text-purple-800 transition-colors font-medium bg-white/60 px-3 py-1.5 rounded-full"
+            style={{fontFamily: 'Work Sans, sans-serif'}}
+          >
+            <ArrowLeft className="w-3 h-3" />
+            Back
+          </button>
         </div>
       </div>
 
