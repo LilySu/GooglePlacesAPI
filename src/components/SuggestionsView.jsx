@@ -1,80 +1,156 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Leaf, Calendar, Heart, Sprout, Sparkles, MapPin, Star, Loader2 } from 'lucide-react';
 import { suggestions as staticSuggestions } from '../data/suggestions';
+
+let googleMapsPromise = null;
+function loadGoogleMapsOnce() {
+  if (window.google) return Promise.resolve();
+  if (googleMapsPromise) return googleMapsPromise;
+  const apiKey = import.meta.env.VITE_GOOGLE_PLACES_API;
+  if (!apiKey) return Promise.resolve();
+  googleMapsPromise = new Promise((resolve) => {
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+    script.async = true;
+    script.onload = resolve;
+    script.onerror = resolve;
+    document.head.appendChild(script);
+  });
+  return googleMapsPromise;
+}
 
 export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis, sessionData }) {
   const [places, setPlaces] = useState([]);
   const [placesLoading, setPlacesLoading] = useState(false);
+  const [activityPlace, setActivityPlace] = useState(null);
+  const [mealPlace, setMealPlace] = useState(null);
+  const [groceryPlace, setGroceryPlace] = useState(null);
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markersRef = useRef([]);
 
   const recommendation = bemAnalysis?.recommendation;
   const placesQuery = bemAnalysis?.placesQuery;
+  const profile = recommendation?.profile;
+
+  const hasAI = !!recommendation;
+
+  const activityProfile = profile?.activity;
+  const mealProfile = profile?.meal;
+  const groceryProfile = profile?.grocery;
+  const microPractice = profile?.microPractice || staticSuggestions[currentDay].microPractice;
+
+  const getLocation = useCallback(() => {
+    if (placesQuery?.query?.location) return placesQuery.query.location;
+    return { lat: 37.7749, lng: -122.4194 };
+  }, [placesQuery]);
+
+  const searchNearby = useCallback((service, keyword, location, callback) => {
+    service.nearbySearch(
+      { location, radius: 5000, keyword },
+      (results, status) => {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && results?.length) {
+          callback(results[0]);
+        }
+      }
+    );
+  }, []);
 
   useEffect(() => {
     if (!recommendation || !placesQuery) return;
 
-    const apiKey = import.meta.env.VITE_GOOGLE_PLACES_API;
-    if (!apiKey) return;
+    const run = async () => {
+      await loadGoogleMapsOnce();
+      if (!window.google || !mapRef.current) return;
 
-    if (!window.google) {
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-      script.async = true;
-      script.onload = () => initMapAndSearch();
-      document.head.appendChild(script);
-    } else {
-      initMapAndSearch();
-    }
-  }, [recommendation, placesQuery]);
+      const location = getLocation();
 
-  const initMapAndSearch = () => {
-    if (!mapRef.current || !window.google) return;
-
-    const center = { lat: 37.7749, lng: -122.4194 };
-
-    if (!mapInstanceRef.current) {
-      mapInstanceRef.current = new window.google.maps.Map(mapRef.current, {
-        center,
-        zoom: 13,
-        disableDefaultUI: true,
-        zoomControl: true,
-        styles: [
-          { featureType: 'poi', stylers: [{ visibility: 'simplified' }] },
-          { featureType: 'water', stylers: [{ color: '#d4e4f7' }] },
-        ],
-      });
-    }
-
-    setPlacesLoading(true);
-    const service = new window.google.maps.places.PlacesService(mapInstanceRef.current);
-
-    const request = {
-      location: center,
-      radius: placesQuery.query.radius || 5000,
-      keyword: placesQuery.query.keyword,
-    };
-
-    service.nearbySearch(request, (results, status) => {
-      setPlacesLoading(false);
-      if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
-        setPlaces(results.slice(0, 8));
-
-        markersRef.current.forEach(m => m.setMap(null));
-        markersRef.current = [];
-
-        results.slice(0, 8).forEach(place => {
-          const marker = new window.google.maps.Marker({
-            position: place.geometry.location,
-            map: mapInstanceRef.current,
-            title: place.name,
-          });
-          markersRef.current.push(marker);
+      if (!mapInstanceRef.current) {
+        mapInstanceRef.current = new window.google.maps.Map(mapRef.current, {
+          center: location,
+          zoom: 13,
+          disableDefaultUI: true,
+          zoomControl: true,
+          styles: [
+            { featureType: 'poi', stylers: [{ visibility: 'simplified' }] },
+            { featureType: 'water', stylers: [{ color: '#d4e4f7' }] },
+          ],
         });
       }
-    });
-  };
+
+      setPlacesLoading(true);
+      const service = new window.google.maps.places.PlacesService(mapInstanceRef.current);
+
+      service.nearbySearch(
+        { location, radius: placesQuery.query.radius || 5000, keyword: placesQuery.query.keyword },
+        (results, status) => {
+          setPlacesLoading(false);
+          if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
+            setPlaces(results.slice(0, 8));
+            markersRef.current.forEach(m => m.setMap(null));
+            markersRef.current = [];
+            results.slice(0, 8).forEach(place => {
+              const marker = new window.google.maps.Marker({
+                position: place.geometry.location,
+                map: mapInstanceRef.current,
+                title: place.name,
+              });
+              markersRef.current.push(marker);
+            });
+          }
+        }
+      );
+
+      if (activityProfile?.searchKeyword) {
+        searchNearby(service, activityProfile.searchKeyword, location, setActivityPlace);
+      }
+      if (mealProfile?.searchKeyword) {
+        searchNearby(service, mealProfile.searchKeyword, location, setMealPlace);
+      }
+      if (groceryProfile?.searchKeyword) {
+        searchNearby(service, groceryProfile.searchKeyword, location, setGroceryPlace);
+      }
+    };
+
+    run();
+  }, [recommendation, placesQuery, activityProfile, mealProfile, groceryProfile, getLocation, searchNearby]);
+
+  const activityTitle = hasAI && activityPlace
+    ? activityPlace.name
+    : (activityProfile?.title || staticSuggestions[currentDay].activity.title);
+  const activityTime = activityProfile?.time || staticSuggestions[currentDay].activity.time;
+  const activityLocation = hasAI && activityPlace
+    ? activityPlace.vicinity
+    : (staticSuggestions[currentDay].activity.location);
+  const activityBenefit = activityProfile?.benefit || staticSuggestions[currentDay].activity.benefit;
+  const activityRating = activityPlace?.rating;
+  const activitySubtext = hasAI && activityPlace && activityProfile
+    ? `Suggested: ${activityProfile.title}`
+    : null;
+
+  const mealItem = hasAI && mealPlace
+    ? mealPlace.name
+    : (mealProfile?.item || staticSuggestions[currentDay].meal.item);
+  const mealLocation = hasAI && mealPlace
+    ? mealPlace.vicinity
+    : (staticSuggestions[currentDay].meal.location);
+  const mealWhy = mealProfile?.why || staticSuggestions[currentDay].meal.why;
+  const mealRating = mealPlace?.rating;
+  const mealSubtext = hasAI && mealPlace && mealProfile
+    ? `Try their: ${mealProfile.item}`
+    : null;
+
+  const groceryItem = hasAI && groceryPlace
+    ? groceryPlace.name
+    : (groceryProfile?.item || staticSuggestions[currentDay].grocery.item);
+  const groceryLocation = hasAI && groceryPlace
+    ? groceryPlace.vicinity
+    : (staticSuggestions[currentDay].grocery.location);
+  const groceryWhy = groceryProfile?.why || staticSuggestions[currentDay].grocery.why;
+  const groceryRating = groceryPlace?.rating;
+  const grocerySubtext = hasAI && groceryPlace && groceryProfile
+    ? `Look for: ${groceryProfile.item}`
+    : null;
 
   return (
     <div className="space-y-6">
@@ -183,11 +259,16 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
           </div>
           <div className="flex-1">
             <h3 className="text-sm uppercase tracking-wider text-rose-700 mb-2 font-medium" style={{fontFamily: 'Work Sans, sans-serif'}}>
-              Today's Micro-Practice
+              {hasAI ? 'Your Personalized Micro-Practice' : "Today's Micro-Practice"}
             </h3>
             <p className="text-2xl text-amber-900 font-light leading-relaxed" style={{fontFamily: 'Spectral, serif'}}>
-              {staticSuggestions[currentDay].microPractice}
+              {microPractice}
             </p>
+            {hasAI && (
+              <p className="text-xs text-rose-600 mt-3 font-medium" style={{fontFamily: 'Work Sans, sans-serif'}}>
+                Based on your biomarker profile: {recommendation.profile.primaryStressor}
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -201,17 +282,33 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-sm font-medium text-orange-600" style={{fontFamily: 'Work Sans, sans-serif'}}>
-                  {staticSuggestions[currentDay].activity.time}
+                  {activityTime}
                 </span>
+                {hasAI && (
+                  <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full" style={{fontFamily: 'Work Sans, sans-serif'}}>
+                    AI Recommended
+                  </span>
+                )}
               </div>
               <h4 className="text-2xl text-amber-900 font-semibold mb-1" style={{fontFamily: 'Spectral, serif'}}>
-                {staticSuggestions[currentDay].activity.title}
+                {activityTitle}
               </h4>
+              {activitySubtext && (
+                <p className="text-xs text-orange-600 mb-1 font-medium" style={{fontFamily: 'Work Sans, sans-serif'}}>
+                  {activitySubtext}
+                </p>
+              )}
               <p className="text-sm text-amber-700 mb-2" style={{fontFamily: 'Work Sans, sans-serif'}}>
-                {staticSuggestions[currentDay].activity.location}
+                {activityLocation}
               </p>
+              {activityRating && (
+                <div className="flex items-center gap-1 mb-2">
+                  <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+                  <span className="text-xs text-amber-600">{activityRating}</span>
+                </div>
+              )}
               <p className="text-amber-800 font-light italic" style={{fontFamily: 'Work Sans, sans-serif'}}>
-                {staticSuggestions[currentDay].activity.benefit}
+                {activityBenefit}
               </p>
             </div>
           </div>
@@ -227,18 +324,36 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
             <div className="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center">
               <Heart className="w-5 h-5 text-amber-600" />
             </div>
-            <h3 className="text-lg font-semibold text-amber-900" style={{fontFamily: 'Spectral, serif'}}>
-              Nourishment Suggestion
-            </h3>
+            <div>
+              <h3 className="text-lg font-semibold text-amber-900" style={{fontFamily: 'Spectral, serif'}}>
+                Nourishment Suggestion
+              </h3>
+              {hasAI && (
+                <span className="text-xs bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full" style={{fontFamily: 'Work Sans, sans-serif'}}>
+                  AI Recommended
+                </span>
+              )}
+            </div>
           </div>
           <p className="text-2xl text-amber-900 font-light mb-2" style={{fontFamily: 'Spectral, serif'}}>
-            {staticSuggestions[currentDay].meal.item}
+            {mealItem}
           </p>
-          <p className="text-sm text-amber-700 mb-3" style={{fontFamily: 'Work Sans, sans-serif'}}>
-            {staticSuggestions[currentDay].meal.location}
+          {mealSubtext && (
+            <p className="text-xs text-amber-600 mb-1 font-medium" style={{fontFamily: 'Work Sans, sans-serif'}}>
+              {mealSubtext}
+            </p>
+          )}
+          <p className="text-sm text-amber-700 mb-1" style={{fontFamily: 'Work Sans, sans-serif'}}>
+            {mealLocation}
           </p>
+          {mealRating && (
+            <div className="flex items-center gap-1 mb-2">
+              <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+              <span className="text-xs text-amber-600">{mealRating}</span>
+            </div>
+          )}
           <p className="text-sm text-amber-800 font-light leading-relaxed" style={{fontFamily: 'Work Sans, sans-serif'}}>
-            {staticSuggestions[currentDay].meal.why}
+            {mealWhy}
           </p>
         </div>
 
@@ -247,18 +362,36 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
             <div className="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center">
               <Sprout className="w-5 h-5 text-rose-600" />
             </div>
-            <h3 className="text-lg font-semibold text-amber-900" style={{fontFamily: 'Spectral, serif'}}>
-              Shopping Suggestion
-            </h3>
+            <div>
+              <h3 className="text-lg font-semibold text-amber-900" style={{fontFamily: 'Spectral, serif'}}>
+                Shopping Suggestion
+              </h3>
+              {hasAI && (
+                <span className="text-xs bg-rose-200 text-rose-800 px-2 py-0.5 rounded-full" style={{fontFamily: 'Work Sans, sans-serif'}}>
+                  AI Recommended
+                </span>
+              )}
+            </div>
           </div>
           <p className="text-2xl text-amber-900 font-light mb-2" style={{fontFamily: 'Spectral, serif'}}>
-            {staticSuggestions[currentDay].grocery.item}
+            {groceryItem}
           </p>
-          <p className="text-sm text-rose-700 mb-3" style={{fontFamily: 'Work Sans, sans-serif'}}>
-            {staticSuggestions[currentDay].grocery.location}
+          {grocerySubtext && (
+            <p className="text-xs text-rose-600 mb-1 font-medium" style={{fontFamily: 'Work Sans, sans-serif'}}>
+              {grocerySubtext}
+            </p>
+          )}
+          <p className="text-sm text-rose-700 mb-1" style={{fontFamily: 'Work Sans, sans-serif'}}>
+            {groceryLocation}
           </p>
+          {groceryRating && (
+            <div className="flex items-center gap-1 mb-2">
+              <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+              <span className="text-xs text-amber-600">{groceryRating}</span>
+            </div>
+          )}
           <p className="text-sm text-amber-800 font-light leading-relaxed" style={{fontFamily: 'Work Sans, sans-serif'}}>
-            {staticSuggestions[currentDay].grocery.why}
+            {groceryWhy}
           </p>
         </div>
       </div>
@@ -273,10 +406,13 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
               Why This Matters
             </h3>
             <h4 className="text-xl text-amber-900 mb-2 font-semibold" style={{fontFamily: 'Spectral, serif'}}>
-              Building Longevity Through Daily Choices
+              {hasAI ? 'Personalized for Your Biology' : 'Building Longevity Through Daily Choices'}
             </h4>
             <p className="text-amber-800 leading-relaxed font-light" style={{fontFamily: 'Work Sans, sans-serif'}}>
-              These aren't just random suggestions—they're based on longevity research. Low-impact movement preserves your joints, anti-inflammatory foods reduce cellular aging, and micro-practices build consistency without overwhelm. You're not training for a marathon; you're building a life that lasts.
+              {hasAI
+                ? `These recommendations are tailored to your biomarker profile showing ${recommendation.profile.primaryStressor.toLowerCase()}. The activity, meal, and grocery suggestions work together to address your specific physiological needs — from movement that supports recovery to nutrition that targets the root cause.`
+                : "These aren't just random suggestions—they're based on longevity research. Low-impact movement preserves your joints, anti-inflammatory foods reduce cellular aging, and micro-practices build consistency without overwhelm. You're not training for a marathon; you're building a life that lasts."
+              }
             </p>
           </div>
         </div>
