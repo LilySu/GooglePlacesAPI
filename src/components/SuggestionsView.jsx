@@ -110,6 +110,12 @@ function loadGoogleMapsOnce() {
   return googleMapsPromise;
 }
 
+
+// ============================================
+// MiniMap.jsx - Null-safe version
+// ============================================
+import { useRef, useEffect } from 'react';
+
 function MiniMap({ place }) {
   const ref = useRef(null);
   const mapInstance = useRef(null);
@@ -117,16 +123,14 @@ function MiniMap({ place }) {
   const placeId = place?.place_id || place?.name || null;
 
   useEffect(() => {
-    console.log('🗺️ MiniMap useEffect triggered', { 
+    console.log('🗺️ MiniMap useEffect', { 
       hasPlace: !!place, 
-      placeName: place?.name,
-      placeId: placeId,
+      placeName: place?.name || 'null',
       hasGeometry: !!place?.geometry?.location 
     });
 
     if (!ref.current || !window.google || !place?.geometry?.location) {
-      console.log('⏸️ MiniMap skipping - missing requirements');
-      // Clear any existing map when no place
+      console.log('⏸️ MiniMap skipping');
       if (markerInstance.current) {
         markerInstance.current.setMap(null);
         markerInstance.current = null;
@@ -143,20 +147,17 @@ function MiniMap({ place }) {
         : place.geometry.location.lng,
     };
 
-    console.log('📍 MiniMap rendering', { pos, placeName: place.name });
+    console.log('📍 MiniMap rendering', place.name || 'unknown');
 
-    // Clean up old marker
     if (markerInstance.current) {
       markerInstance.current.setMap(null);
       markerInstance.current = null;
     }
 
     if (mapInstance.current) {
-      // Update existing map
       mapInstance.current.setCenter(pos);
       mapInstance.current.setZoom(15);
     } else {
-      // Create new map instance
       mapInstance.current = new window.google.maps.Map(ref.current, {
         center: pos,
         zoom: 15,
@@ -172,18 +173,16 @@ function MiniMap({ place }) {
       });
     }
 
-    // Create new marker
     markerInstance.current = new window.google.maps.Marker({
       position: pos,
       map: mapInstance.current,
-      title: place.name,
+      title: place.name || 'Location',
     });
 
-    console.log('✅ MiniMap marker created for', place.name);
+    console.log('✅ MiniMap marker created');
 
   }, [place, placeId]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (markerInstance.current) {
@@ -192,15 +191,13 @@ function MiniMap({ place }) {
     };
   }, []);
 
-  // FIXED: Always render the div, even when no place
-  // This ensures the ref is available when place data arrives
   return (
     <div
       ref={ref}
       className="w-full h-36 rounded-xl border border-orange-200/30 mt-3"
       style={{ 
         minHeight: '144px',
-        backgroundColor: place?.geometry?.location ? 'transparent' : '#f3f4f6' // Gray when loading
+        backgroundColor: place?.geometry?.location ? 'transparent' : '#f3f4f6'
       }}
     >
       {!place?.geometry?.location && (
@@ -357,8 +354,8 @@ export default function SuggestionsView({ currentDay, setCurrentDay, sessionData
     setTimeout(() => setShuffling(false), 400);
   };
 
-  const activityTitle = activityPlace ? activityPlace.name : activityMeta.title;
-  const activityLocation = activityPlace ? activityPlace.vicinity : activityMeta.location;
+  const activityTitle = activityPlace?.name || activityMeta?.title || 'Activity';
+  const activityLocation = activityPlace?.vicinity || activityMeta?.location || 'Location TBD';
   const activityRating = activityPlace?.rating;
   const activityTime = activityMeta.time;
   const activityBenefit = activityMeta.benefit;

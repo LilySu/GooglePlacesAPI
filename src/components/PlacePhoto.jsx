@@ -1,3 +1,6 @@
+// ============================================
+// PlacePhoto.jsx - Null-safe version
+// ============================================
 import { useState, useEffect } from 'react';
 
 function PlacePhoto({ place, fallbackImage, altText, className }) {
@@ -23,7 +26,7 @@ function PlacePhoto({ place, fallbackImage, altText, className }) {
           maxHeight: 600
         });
         
-        console.log('📸 Loading photo for', place.name);
+        console.log('📸 Loading photo for', place.name || 'unknown');
         setPhotoUrl(url);
         setLoading(false);
       } catch (err) {
@@ -32,13 +35,12 @@ function PlacePhoto({ place, fallbackImage, altText, className }) {
         setLoading(false);
       }
     } else {
-      console.log('📷 No photos available for', place.name);
+      console.log('📷 No photos available');
       setError(true);
       setLoading(false);
     }
   }, [place]);
 
-  // Show fallback during loading or error
   if (loading || error || !photoUrl) {
     return (
       <div className="relative">
@@ -60,14 +62,13 @@ function PlacePhoto({ place, fallbackImage, altText, className }) {
     <div className="relative group">
       <img
         src={photoUrl}
-        alt={`${place.name} - ${altText}`}
+        alt={place?.name ? `${place.name} - ${altText}` : altText}
         className={`${className} transition-opacity duration-300`}
         onError={() => {
-          console.log('❌ Failed to load image, showing fallback');
+          console.log('❌ Failed to load image');
           setError(true);
         }}
       />
-      {/* Optional: Show a badge indicating it's from Google Places */}
       <div className="absolute bottom-2 right-2 bg-white/90 px-2 py-1 rounded text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">
         📸 Place photo
       </div>
