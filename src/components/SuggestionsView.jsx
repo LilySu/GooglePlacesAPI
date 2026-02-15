@@ -202,15 +202,6 @@ export default function SuggestionsView({ currentDay, setCurrentDay, sessionData
   }, []);
 
   useEffect(() => {
-    setActivityResults([]);
-    setMealResults([]);
-    setGroceryResults([]);
-    setActivityIdx(0);
-    setMealIdx(0);
-    setGroceryIdx(0);
-  }, [currentDay]);
-
-  useEffect(() => {
     const run = async () => {
       await loadGoogleMapsOnce();
       if (!window.google) return;
@@ -220,6 +211,13 @@ export default function SuggestionsView({ currentDay, setCurrentDay, sessionData
   }, []);
 
   useEffect(() => {
+    setActivityResults([]);
+    setMealResults([]);
+    setGroceryResults([]);
+    setActivityIdx(0);
+    setMealIdx(0);
+    setGroceryIdx(0);
+
     if (!placesReady || !window.google) return;
 
     const location = getLocation();
@@ -234,7 +232,7 @@ export default function SuggestionsView({ currentDay, setCurrentDay, sessionData
     if (activitySearch) searchPlaces(service, activitySearch, location, setActivityResults);
     if (mealSearch) searchPlaces(service, mealSearch, location, setMealResults);
     if (grocerySearch) searchPlaces(service, grocerySearch, location, setGroceryResults);
-  }, [placesReady, activitySearch, mealSearch, grocerySearch, getLocation, searchPlaces]);
+  }, [currentDay, placesReady, activitySearch, mealSearch, grocerySearch, getLocation, searchPlaces]);
 
   const handleShuffle = () => {
     setShuffling(true);
