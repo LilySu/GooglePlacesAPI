@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Leaf, Calendar, Heart, Sprout, Sparkles, MapPin, Star, Loader2, Shuffle } from 'lucide-react';
 import { suggestions as staticSuggestions } from '../data/suggestions';
+import harvestBowlImg from '@assets/j-g-1yDF6qRULCY-unsplash_1771111819808_1771120987644.jpg';
+import purplePotatoesImg from '@assets/zoshua-colah-Hz5Q8RstsNg-unsplash_1771111849811_1771120987643.jpg';
 
 let googleMapsPromise = null;
 function loadGoogleMapsOnce() {
@@ -286,11 +288,6 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
               <p className="text-amber-800 leading-relaxed font-light" style={{fontFamily: 'Work Sans, sans-serif'}}>
                 {recommendation.profile.reasoning}
               </p>
-              {placesQuery?.recommendation?.lookingFor && (
-                <p className="text-sm text-amber-600 mt-3 italic" style={{fontFamily: 'Work Sans, sans-serif'}}>
-                  Looking for: {placesQuery.recommendation.lookingFor}
-                </p>
-              )}
             </div>
           </div>
         </div>
@@ -356,11 +353,6 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
             <p className="text-2xl text-amber-900 font-light leading-relaxed" style={{fontFamily: 'Spectral, serif'}}>
               {microPractice}
             </p>
-            {hasAI && (
-              <p className="text-xs text-rose-600 mt-3 font-medium" style={{fontFamily: 'Work Sans, sans-serif'}}>
-                Based on your biomarker profile: {recommendation.profile.primaryStressor}
-              </p>
-            )}
           </div>
         </div>
       </div>
@@ -389,24 +381,19 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
             <h4 className="text-2xl text-amber-900 font-semibold mb-1" style={{fontFamily: 'Spectral, serif'}}>
               {activityTitle}
             </h4>
-            {activityPlace && (
-              <p className="text-xs text-orange-600 mb-1 font-medium" style={{fontFamily: 'Work Sans, sans-serif'}}>
-                {hasAI ? `Suggested activity: ${activityMeta.title}` : `For: ${staticDay.activity.title}`}
-              </p>
-            )}
             <div className="flex items-center gap-2 mb-2">
               <MapPin className="w-3 h-3 text-amber-500" />
               <p className="text-sm text-amber-700" style={{fontFamily: 'Work Sans, sans-serif'}}>
                 {activityLocation}
               </p>
+              {activityRating && (
+                <>
+                  <Star className="w-3 h-3 text-amber-500 fill-amber-500 ml-2" />
+                  <span className="text-xs text-amber-600">{activityRating}</span>
+                </>
+              )}
             </div>
-            {activityRating && (
-              <div className="flex items-center gap-1 mb-2">
-                <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
-                <span className="text-xs text-amber-600">{activityRating}</span>
-              </div>
-            )}
-            <p className="text-amber-800 font-light italic" style={{fontFamily: 'Work Sans, sans-serif'}}>
+            <p className="text-sm text-amber-800 font-light italic line-clamp-1" style={{fontFamily: 'Work Sans, sans-serif'}}>
               {activityBenefit}
             </p>
             <MiniMap place={activityPlace} />
@@ -415,12 +402,12 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fadeInUp" style={{animationDelay: '0.7s'}}>
-        <div className="bg-gradient-to-br from-amber-100 to-orange-100 rounded-3xl p-6 border border-amber-200/50 card-hover">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center">
+        <div className="bg-gradient-to-br from-amber-100 to-orange-100 rounded-3xl p-6 border border-amber-200/50 card-hover flex flex-col">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center flex-shrink-0">
               <Heart className="w-5 h-5 text-amber-600" />
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
               <h3 className="text-lg font-semibold text-amber-900" style={{fontFamily: 'Spectral, serif'}}>
                 Nourishment Suggestion
               </h3>
@@ -436,38 +423,40 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
               )}
             </div>
           </div>
-          <p className="text-2xl text-amber-900 font-light mb-2" style={{fontFamily: 'Spectral, serif'}}>
+          <p className="text-xl text-amber-900 font-light mb-1" style={{fontFamily: 'Spectral, serif'}}>
             {mealTitle}
           </p>
-          {mealPlace && (
-            <p className="text-xs text-amber-600 mb-1 font-medium" style={{fontFamily: 'Work Sans, sans-serif'}}>
-              {hasAI ? `Try their: ${mealMeta.item}` : `Try: ${staticDay.meal.item}`}
-            </p>
-          )}
           <div className="flex items-center gap-2 mb-1">
             <MapPin className="w-3 h-3 text-amber-500" />
-            <p className="text-sm text-amber-700" style={{fontFamily: 'Work Sans, sans-serif'}}>
+            <p className="text-sm text-amber-700 truncate" style={{fontFamily: 'Work Sans, sans-serif'}}>
               {mealLocation}
             </p>
+            {mealRating && (
+              <>
+                <Star className="w-3 h-3 text-amber-500 fill-amber-500 ml-1 flex-shrink-0" />
+                <span className="text-xs text-amber-600 flex-shrink-0">{mealRating}</span>
+              </>
+            )}
           </div>
-          {mealRating && (
-            <div className="flex items-center gap-1 mb-2">
-              <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
-              <span className="text-xs text-amber-600">{mealRating}</span>
-            </div>
-          )}
-          <p className="text-sm text-amber-800 font-light leading-relaxed" style={{fontFamily: 'Work Sans, sans-serif'}}>
+          <p className="text-sm text-amber-800 font-light line-clamp-1 mb-3" style={{fontFamily: 'Work Sans, sans-serif'}}>
             {mealWhy}
           </p>
-          <MiniMap place={mealPlace} />
+          <div className="mt-auto">
+            <img
+              src={harvestBowlImg}
+              alt="Nourishment suggestion"
+              className="w-full h-36 object-cover rounded-2xl border border-amber-200/50"
+            />
+            <MiniMap place={mealPlace} />
+          </div>
         </div>
 
-        <div className="bg-gradient-to-br from-rose-100 to-orange-100 rounded-3xl p-6 border border-rose-200/50 card-hover">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center">
+        <div className="bg-gradient-to-br from-rose-100 to-orange-100 rounded-3xl p-6 border border-rose-200/50 card-hover flex flex-col">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center flex-shrink-0">
               <Sprout className="w-5 h-5 text-rose-600" />
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
               <h3 className="text-lg font-semibold text-amber-900" style={{fontFamily: 'Spectral, serif'}}>
                 Shopping Suggestion
               </h3>
@@ -483,30 +472,32 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
               )}
             </div>
           </div>
-          <p className="text-2xl text-amber-900 font-light mb-2" style={{fontFamily: 'Spectral, serif'}}>
+          <p className="text-xl text-amber-900 font-light mb-1" style={{fontFamily: 'Spectral, serif'}}>
             {groceryTitle}
           </p>
-          {groceryPlace && (
-            <p className="text-xs text-rose-600 mb-1 font-medium" style={{fontFamily: 'Work Sans, sans-serif'}}>
-              {hasAI ? `Look for: ${groceryMeta.item}` : `Look for: ${staticDay.grocery.item}`}
-            </p>
-          )}
           <div className="flex items-center gap-2 mb-1">
             <MapPin className="w-3 h-3 text-rose-500" />
-            <p className="text-sm text-rose-700" style={{fontFamily: 'Work Sans, sans-serif'}}>
+            <p className="text-sm text-rose-700 truncate" style={{fontFamily: 'Work Sans, sans-serif'}}>
               {groceryLocation}
             </p>
+            {groceryRating && (
+              <>
+                <Star className="w-3 h-3 text-amber-500 fill-amber-500 ml-1 flex-shrink-0" />
+                <span className="text-xs text-amber-600 flex-shrink-0">{groceryRating}</span>
+              </>
+            )}
           </div>
-          {groceryRating && (
-            <div className="flex items-center gap-1 mb-2">
-              <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
-              <span className="text-xs text-amber-600">{groceryRating}</span>
-            </div>
-          )}
-          <p className="text-sm text-amber-800 font-light leading-relaxed" style={{fontFamily: 'Work Sans, sans-serif'}}>
+          <p className="text-sm text-amber-800 font-light line-clamp-1 mb-3" style={{fontFamily: 'Work Sans, sans-serif'}}>
             {groceryWhy}
           </p>
-          <MiniMap place={groceryPlace} />
+          <div className="mt-auto">
+            <img
+              src={purplePotatoesImg}
+              alt="Shopping suggestion"
+              className="w-full h-36 object-cover rounded-2xl border border-rose-200/50"
+            />
+            <MiniMap place={groceryPlace} />
+          </div>
         </div>
       </div>
 
@@ -522,10 +513,10 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
             <h4 className="text-xl text-amber-900 mb-2 font-semibold" style={{fontFamily: 'Spectral, serif'}}>
               {hasAI ? 'Personalized for Your Biology' : 'Building Longevity Through Daily Choices'}
             </h4>
-            <p className="text-amber-800 leading-relaxed font-light" style={{fontFamily: 'Work Sans, sans-serif'}}>
+            <p className="text-amber-800 leading-relaxed font-light line-clamp-3" style={{fontFamily: 'Work Sans, sans-serif'}}>
               {hasAI
-                ? `These recommendations are tailored to your biomarker profile showing ${recommendation.profile.primaryStressor.toLowerCase()}. The activity, meal, and grocery suggestions work together to address your specific physiological needs — from movement that supports recovery to nutrition that targets the root cause.`
-                : "These aren't just random suggestions—they're based on longevity research and real venues near you. Low-impact movement preserves your joints, anti-inflammatory foods reduce cellular aging, and micro-practices build consistency without overwhelm. You're not training for a marathon; you're building a life that lasts."
+                ? `These recommendations are tailored to your biomarker profile showing ${recommendation.profile.primaryStressor.toLowerCase()}. The activity, meal, and grocery suggestions work together to address your specific physiological needs.`
+                : "These aren't just random suggestions—they're based on longevity research and real venues near you. Low-impact movement preserves your joints, anti-inflammatory foods reduce cellular aging, and micro-practices build consistency without overwhelm."
               }
             </p>
           </div>

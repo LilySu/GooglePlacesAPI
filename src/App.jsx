@@ -6,8 +6,11 @@ import DashboardView from './components/DashboardView';
 import SuggestionsView from './components/SuggestionsView';
 import MetricsView from './components/MetricsView';
 import UploadView from './components/UploadView';
+import MessagingPortal from './components/MessagingPortal';
 import { defaultSessionData } from './data/defaultSessionData';
 import { calculateLongevityScore } from './utils/calculations';
+import { matchedUser } from './data/communityData';
+import { initialChatMessages } from './data/communityData';
 
 export default function App() {
   const [currentView, setCurrentView] = useState('dashboard');
@@ -16,6 +19,7 @@ export default function App() {
   const [plantGrowth, setPlantGrowth] = useState(75);
   const [currentDay, setCurrentDay] = useState('day1');
   const [bemAnalysis, setBemAnalysis] = useState(null);
+  const [showChat, setShowChat] = useState(false);
 
   const longevityScore = calculateLongevityScore(sessionData, currentSession);
   const session1Score = calculateLongevityScore(sessionData, 'session1');
@@ -24,6 +28,23 @@ export default function App() {
   const handleBemAnalysis = (result) => {
     setBemAnalysis(result);
   };
+
+  const matchedUserWithChat = { ...matchedUser, chatMessages: initialChatMessages };
+
+  if (showChat) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-rose-50 to-orange-50 p-4 md:p-8">
+        <div className="max-w-7xl mx-auto">
+          <Header />
+          <MessagingPortal
+            matchedUser={matchedUserWithChat}
+            sessionData={sessionData}
+            onBack={() => setShowChat(false)}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-rose-50 to-orange-50 p-4 md:p-8">
@@ -42,6 +63,7 @@ export default function App() {
             sessionData={sessionData}
             currentSession={currentSession}
             setCurrentSession={setCurrentSession}
+            onOpenChat={() => setShowChat(true)}
           />
         )}
         {currentView === 'suggestions' && (

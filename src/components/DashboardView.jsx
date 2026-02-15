@@ -1,8 +1,10 @@
 import { Activity, Target, Zap, Heart, Sparkles } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { calculateProgress, getProgressData } from '../utils/calculations';
+import CommunityMatchCard from './CommunityMatchCard';
+import { matchedUser } from '../data/communityData';
 
-export default function DashboardView({ sessionData, currentSession, setCurrentSession }) {
+export default function DashboardView({ sessionData, currentSession, setCurrentSession, onOpenChat }) {
   const progressData = getProgressData(sessionData);
 
   return (
@@ -94,6 +96,12 @@ export default function DashboardView({ sessionData, currentSession, setCurrentS
           textColor="text-rose-700"
         />
       </div>
+
+      <CommunityMatchCard
+        matchedUser={matchedUser}
+        sessionData={sessionData}
+        onOpenChat={onOpenChat}
+      />
 
       <div className="bg-gradient-to-br from-rose-100/80 to-orange-100/80 rounded-3xl p-8 border border-rose-200/50 card-hover animate-fadeInUp" style={{animationDelay: '0.7s'}}>
         <div className="flex items-start gap-4">
