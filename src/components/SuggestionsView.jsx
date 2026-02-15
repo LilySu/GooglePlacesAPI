@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import PlacePhoto from './PlacePhoto';
 import { Leaf, Calendar, Heart, Sprout, Sparkles, MapPin, Star, Shuffle } from 'lucide-react';
 import { suggestions as staticSuggestions } from '../data/suggestions';
 import harvestBowlImg from '@assets/j-g-1yDF6qRULCY-unsplash_1771111819808_1771120987644.jpg';
@@ -519,9 +520,10 @@ export default function SuggestionsView({ currentDay, setCurrentDay, sessionData
             {mealWhy}
           </p>
           <div className="mt-auto">
-            <img
-              src={harvestBowlImg}
-              alt="Nourishment suggestion"
+            <PlacePhoto
+              place={mealPlace}
+              fallbackImage={harvestBowlImg}
+              altText="Nourishment suggestion"
               className="w-full h-36 object-cover rounded-2xl border border-amber-200/50"
             />
             <MiniMap place={mealPlace} />
@@ -563,9 +565,10 @@ export default function SuggestionsView({ currentDay, setCurrentDay, sessionData
             {groceryWhy}
           </p>
           <div className="mt-auto">
-            <img
-              src={purplePotatoesImg}
-              alt="Shopping suggestion"
+            <PlacePhoto
+              place={groceryPlace}
+              fallbackImage={purplePotatoesImg}
+              altText="Shopping suggestion"
               className="w-full h-36 object-cover rounded-2xl border border-rose-200/50"
             />
             <MiniMap place={groceryPlace} />
