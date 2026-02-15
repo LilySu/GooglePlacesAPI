@@ -113,16 +113,23 @@ function MiniMap({ place }) {
   const ref = useRef(null);
   const mapInstance = useRef(null);
   const markerInstance = useRef(null);
+  const placeId = place?.place_id || place?.name || null;
 
   useEffect(() => {
     console.log('🗺️ MiniMap useEffect triggered', { 
       hasPlace: !!place, 
       placeName: place?.name,
+      placeId: placeId,
       hasGeometry: !!place?.geometry?.location 
     });
 
     if (!ref.current || !window.google || !place?.geometry?.location) {
       console.log('⏸️ MiniMap skipping - missing requirements');
+      // Clear any existing map when no place
+      if (markerInstance.current) {
+        markerInstance.current.setMap(null);
+        markerInstance.current = null;
+      }
       return;
     }
 
@@ -137,19 +144,18 @@ function MiniMap({ place }) {
 
     console.log('📍 MiniMap rendering', { pos, placeName: place.name });
 
-    // Always recreate the map when place changes to ensure clean state
+    // Clean up old marker
+    if (markerInstance.current) {
+      markerInstance.current.setMap(null);
+      markerInstance.current = null;
+    }
+
     if (mapInstance.current) {
-      // Clean up old marker
-      if (markerInstance.current) {
-        markerInstance.current.setMap(null);
-        markerInstance.current = null;
-      }
-      
       // Update existing map
       mapInstance.current.setCenter(pos);
       mapInstance.current.setZoom(15);
     } else {
-      // Create new map
+      // Create new map instance
       mapInstance.current = new window.google.maps.Map(ref.current, {
         center: pos,
         zoom: 15,
@@ -174,7 +180,7 @@ function MiniMap({ place }) {
 
     console.log('✅ MiniMap marker created for', place.name);
 
-  }, [place]); // This dependency should trigger when place changes
+  }, [place, placeId]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -185,17 +191,23 @@ function MiniMap({ place }) {
     };
   }, []);
 
-  if (!place?.geometry?.location) {
-    console.log('🚫 MiniMap not rendering - no place data');
-    return null;
-  }
-
+  // FIXED: Always render the div, even when no place
+  // This ensures the ref is available when place data arrives
   return (
     <div
       ref={ref}
       className="w-full h-36 rounded-xl border border-orange-200/30 mt-3"
-      style={{ minHeight: '144px' }}
-    />
+      style={{ 
+        minHeight: '144px',
+        backgroundColor: place?.geometry?.location ? 'transparent' : '#f3f4f6' // Gray when loading
+      }}
+    >
+      {!place?.geometry?.location && (
+        <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+          Loading map...
+        </div>
+      )}
+    </div>
   );
 }
 
