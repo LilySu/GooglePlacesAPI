@@ -15,15 +15,10 @@ export default function App() {
   const [currentSession, setCurrentSession] = useState('session12');
   const [plantGrowth, setPlantGrowth] = useState(75);
   const [currentDay, setCurrentDay] = useState('day1');
-  const [bemAnalysis, setBemAnalysis] = useState(null);
 
   const longevityScore = calculateLongevityScore(sessionData, currentSession);
   const session1Score = calculateLongevityScore(sessionData, 'session1');
   const session12Score = calculateLongevityScore(sessionData, 'session12');
-
-  const handleBemAnalysis = (result) => {
-    setBemAnalysis(result);
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-rose-50 to-orange-50 p-4 md:p-8">
@@ -45,12 +40,7 @@ export default function App() {
           />
         )}
         {currentView === 'suggestions' && (
-          <SuggestionsView
-            currentDay={currentDay}
-            setCurrentDay={setCurrentDay}
-            bemAnalysis={bemAnalysis}
-            sessionData={sessionData}
-          />
+          <SuggestionsView currentDay={currentDay} setCurrentDay={setCurrentDay} />
         )}
         {currentView === 'metrics' && (
           <MetricsView sessionData={sessionData} currentSession={currentSession} />
@@ -61,7 +51,6 @@ export default function App() {
             setSessionData={setSessionData}
             plantGrowth={plantGrowth}
             setPlantGrowth={setPlantGrowth}
-            onBemAnalysis={handleBemAnalysis}
           />
         )}
       </div>
