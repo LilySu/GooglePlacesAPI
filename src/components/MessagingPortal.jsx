@@ -26,6 +26,7 @@ function getTrajectoryChartData(sessionData) {
 
 function TrajectoryMiniChart({ sessionData, label, color, bgGradient }) {
   const data = getTrajectoryChartData(sessionData);
+  const gradId = `grad-${label.replace(/[^a-zA-Z0-9]/g, '')}`;
 
   return (
     <div className={`rounded-2xl p-4 border ${bgGradient}`}>
@@ -35,13 +36,13 @@ function TrajectoryMiniChart({ sessionData, label, color, bgGradient }) {
       <ResponsiveContainer width="100%" height={100}>
         <AreaChart data={data}>
           <defs>
-            <linearGradient id={`grad-${label.replace(/\s/g,'')}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity={0.45} />
-              <stop offset="100%" stopColor={color} stopOpacity={0.1} />
+            <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={color} stopOpacity={0.5} />
+              <stop offset="100%" stopColor={color} stopOpacity={0.15} />
             </linearGradient>
           </defs>
           <XAxis dataKey="session" tick={false} axisLine={false} tickLine={false} hide />
-          <Area type="monotone" dataKey="strength" stroke={color} strokeWidth={2} fill={`url(#grad-${label.replace(/\s/g,'')})`} dot={false} />
+          <Area type="monotone" dataKey="strength" stroke={color} strokeWidth={2} fill={`url(#${gradId})`} dot={false} />
           <Line type="monotone" dataKey="balance" stroke={color} strokeWidth={1.5} strokeDasharray="4 2" dot={false} />
           <Line type="monotone" dataKey="wellbeing" stroke={color} strokeWidth={1} strokeOpacity={0.5} dot={false} />
         </AreaChart>
