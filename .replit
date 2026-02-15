@@ -45,5 +45,5 @@ publicDir = "dist"
 [userenv]
 
 [userenv.shared]
-VITE_GOOGLE_PLACES_API = "AIzaSyCHMSa1NNLhXZvV1XfNgf7MJRtJrpomX-M"
+VITE_GOOGLE_PLACES_API = "AIzaSyB1O5lb91sfN-KALR23M16QqUMJ3wXSl_c"
 VITE_BEM_API_KEY = "97sojYx4J/aq47z3mD97ySfZIn2HloI4snUNBZZN11k"

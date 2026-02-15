@@ -4,8 +4,8 @@ import { LineChart, Line, ResponsiveContainer, XAxis, Area, AreaChart } from 're
 import { getProgressData } from '../utils/calculations';
 import { SESSION_LIST } from '../data/sessions';
 import { initialChatMessages } from '../data/communityData';
-import gentleFlowImg from '@assets/dane-wetton-t1NEMSm1rgI-unsplash_1771111922313_1771120987645.jpg';
-import partnerChallengeImg from '@assets/jessica-streser-5ai6kpW4NOw-unsplash_1771111996592_1771120987644.jpg';
+import gentleFlowImg from '@assets/dane-wetton-t1NEMSm1rgI-unsplash_1771111922313.jpg';
+import partnerChallengeImg from '@assets/jessica-streser-5ai6kpW4NOw-unsplash_1771111996592.jpg';
 
 const MESSAGE_IMAGES = {
   gentleFlow: gentleFlowImg,

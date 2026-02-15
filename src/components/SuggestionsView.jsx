@@ -1,8 +1,96 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Leaf, Calendar, Heart, Sprout, Sparkles, MapPin, Star, Loader2, Shuffle } from 'lucide-react';
+import { Leaf, Calendar, Heart, Sprout, Sparkles, MapPin, Star, Shuffle } from 'lucide-react';
 import { suggestions as staticSuggestions } from '../data/suggestions';
 import harvestBowlImg from '@assets/j-g-1yDF6qRULCY-unsplash_1771111819808_1771120987644.jpg';
 import purplePotatoesImg from '@assets/zoshua-colah-Hz5Q8RstsNg-unsplash_1771111849811_1771120987643.jpg';
+
+const BIOMARKER_ALERTS = [
+  {
+    label: 'Grip Strength',
+    dropPercent: 10,
+    emoji: '\u{1F932}',
+    exercise: 'Downward Facing Dog',
+    description: 'Holding this pose rebuilds the hand-to-floor connection and strengthens your grip endurance.',
+    gradient: 'from-rose-100/90 to-orange-50/90',
+    accent: 'rose',
+  },
+  {
+    label: 'Core Stability',
+    dropPercent: 5,
+    emoji: '\u{1F9D8}',
+    exercise: 'Hold a Plank',
+    prescription: 'Aim for at least 15 seconds, 4 times a week.',
+    description: 'Rebuilding your plank hold restores the deep core engagement needed for every movement you do.',
+    gradient: 'from-amber-100/90 to-orange-50/90',
+    accent: 'amber',
+  },
+  {
+    label: 'Balance & Symmetry',
+    dropPercent: 5,
+    emoji: '\u{1F333}',
+    exercise: 'Tree Pose (L)',
+    description: 'Practicing a static balance pose helps recalibrate your stability and weight distribution.',
+    gradient: 'from-orange-100/90 to-amber-50/90',
+    accent: 'orange',
+  },
+];
+
+const ACCENT_STYLES = {
+  rose: {
+    badge: 'bg-rose-200/70 text-rose-700',
+    border: 'border-rose-200/60',
+    heading: 'text-rose-800',
+    tag: 'text-rose-600',
+  },
+  amber: {
+    badge: 'bg-amber-200/70 text-amber-700',
+    border: 'border-amber-200/60',
+    heading: 'text-amber-800',
+    tag: 'text-amber-600',
+  },
+  orange: {
+    badge: 'bg-orange-200/70 text-orange-700',
+    border: 'border-orange-200/60',
+    heading: 'text-orange-800',
+    tag: 'text-orange-600',
+  },
+};
+
+function AlertCard({ alert, index }) {
+  const s = ACCENT_STYLES[alert.accent];
+
+  return (
+    <div
+      className={`bg-gradient-to-br ${alert.gradient} rounded-3xl p-6 border ${s.border} card-hover animate-fadeInUp`}
+      style={{ animationDelay: `${0.15 + index * 0.12}s` }}
+    >
+      <div className="flex items-start gap-5">
+        <div className="text-4xl flex-shrink-0 pt-1">{alert.emoji}</div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
+            <span className={`text-sm uppercase tracking-widest font-semibold ${s.tag}`} style={{ fontFamily: 'Work Sans, sans-serif' }}>
+              {alert.label}
+            </span>
+            <span className={`text-sm ${s.badge} px-3 py-1 rounded-full font-semibold`} style={{ fontFamily: 'Work Sans, sans-serif' }}>
+              ↓ {alert.dropPercent}% this month
+            </span>
+          </div>
+          <h4 className={`text-xl md:text-2xl font-semibold ${s.heading} mb-1`} style={{ fontFamily: 'Spectral, serif' }}>
+            {alert.exercise}
+          </h4>
+          {alert.prescription && (
+            <p className="text-base font-medium text-amber-800 mb-1.5" style={{ fontFamily: 'Work Sans, sans-serif' }}>
+              {alert.prescription}
+            </p>
+          )}
+          <p className="text-base text-amber-700/90 leading-relaxed" style={{ fontFamily: 'Work Sans, sans-serif' }}>
+            {alert.description}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 let googleMapsPromise = null;
 function loadGoogleMapsOnce() {
@@ -71,9 +159,7 @@ function MiniMap({ place }) {
   );
 }
 
-export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis, sessionData }) {
-  const [venueResults, setVenueResults] = useState([]);
-  const [venueLoading, setVenueLoading] = useState(false);
+export default function SuggestionsView({ currentDay, setCurrentDay, sessionData }) {
   const [activityResults, setActivityResults] = useState([]);
   const [mealResults, setMealResults] = useState([]);
   const [groceryResults, setGroceryResults] = useState([]);
@@ -82,35 +168,26 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
   const [groceryIdx, setGroceryIdx] = useState(0);
   const [placesReady, setPlacesReady] = useState(false);
   const [shuffling, setShuffling] = useState(false);
-  const mapRef = useRef(null);
-  const mapInstanceRef = useRef(null);
-  const markersRef = useRef([]);
   const placesServiceRef = useRef(null);
-
-  const recommendation = bemAnalysis?.recommendation;
-  const placesQuery = bemAnalysis?.placesQuery;
-  const profile = recommendation?.profile;
-  const hasAI = !!recommendation;
 
   const staticDay = staticSuggestions[currentDay];
 
-  const activitySearch = hasAI ? profile.activity?.searchKeyword : staticDay.activity.searchKeyword;
-  const mealSearch = hasAI ? profile.meal?.searchKeyword : staticDay.meal.searchKeyword;
-  const grocerySearch = hasAI ? profile.grocery?.searchKeyword : staticDay.grocery.searchKeyword;
+  const activitySearch = staticDay.activity.searchKeyword;
+  const mealSearch = staticDay.meal.searchKeyword;
+  const grocerySearch = staticDay.grocery.searchKeyword;
 
-  const activityMeta = hasAI ? profile.activity : staticDay.activity;
-  const mealMeta = hasAI ? profile.meal : staticDay.meal;
-  const groceryMeta = hasAI ? profile.grocery : staticDay.grocery;
-  const microPractice = hasAI ? (profile.microPractice || staticDay.microPractice) : staticDay.microPractice;
+  const activityMeta = staticDay.activity;
+  const mealMeta = staticDay.meal;
+  const groceryMeta = staticDay.grocery;
+  const microPractice = staticDay.microPractice;
 
   const activityPlace = activityResults[activityIdx] || null;
   const mealPlace = mealResults[mealIdx] || null;
   const groceryPlace = groceryResults[groceryIdx] || null;
 
   const getLocation = useCallback(() => {
-    if (placesQuery?.query?.location) return placesQuery.query.location;
     return { lat: 37.7749, lng: -122.4194 };
-  }, [placesQuery]);
+  }, []);
 
   const searchPlaces = useCallback((service, keyword, location, setter) => {
     if (!keyword) return;
@@ -131,7 +208,7 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
     setActivityIdx(0);
     setMealIdx(0);
     setGroceryIdx(0);
-  }, [currentDay, hasAI]);
+  }, [currentDay]);
 
   useEffect(() => {
     const run = async () => {
@@ -158,48 +235,6 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
     if (mealSearch) searchPlaces(service, mealSearch, location, setMealResults);
     if (grocerySearch) searchPlaces(service, grocerySearch, location, setGroceryResults);
   }, [placesReady, activitySearch, mealSearch, grocerySearch, getLocation, searchPlaces]);
-
-  useEffect(() => {
-    if (!hasAI || !placesReady || !placesQuery || !mapRef.current || !window.google) return;
-
-    const location = getLocation();
-
-    if (!mapInstanceRef.current) {
-      mapInstanceRef.current = new window.google.maps.Map(mapRef.current, {
-        center: location,
-        zoom: 13,
-        disableDefaultUI: true,
-        zoomControl: true,
-        styles: [
-          { featureType: 'poi', stylers: [{ visibility: 'simplified' }] },
-          { featureType: 'water', stylers: [{ color: '#d4e4f7' }] },
-        ],
-      });
-    }
-
-    setVenueLoading(true);
-    const service = new window.google.maps.places.PlacesService(mapInstanceRef.current);
-
-    service.nearbySearch(
-      { location, radius: placesQuery.query.radius || 5000, keyword: placesQuery.query.keyword },
-      (results, status) => {
-        setVenueLoading(false);
-        if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
-          setVenueResults(results.slice(0, 8));
-          markersRef.current.forEach(m => m.setMap(null));
-          markersRef.current = [];
-          results.slice(0, 8).forEach(place => {
-            const marker = new window.google.maps.Marker({
-              position: place.geometry.location,
-              map: mapInstanceRef.current,
-              title: place.name,
-            });
-            markersRef.current.push(marker);
-          });
-        }
-      }
-    );
-  }, [hasAI, placesReady, placesQuery, getLocation]);
 
   const handleShuffle = () => {
     setShuffling(true);
@@ -235,7 +270,16 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col items-center gap-4 mb-6 animate-fadeInUp" style={{animationDelay: '0.4s'}}>
+      <div className="space-y-4 animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+        <h3 className="text-sm uppercase tracking-widest text-rose-600 font-semibold px-1" style={{ fontFamily: 'Work Sans, sans-serif' }}>
+          Your Body This Month
+        </h3>
+        {BIOMARKER_ALERTS.map((alert, i) => (
+          <AlertCard key={alert.label} alert={alert} index={i} />
+        ))}
+      </div>
+
+      <div className="flex flex-col items-center gap-4 mb-6 animate-fadeInUp" style={{animationDelay: '0.5s'}}>
         <div className="flex items-center gap-3">
           {[
             { key: 'day1', label: 'Today' },
@@ -269,86 +313,14 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
         )}
       </div>
 
-      {hasAI && (
-        <div className="bg-gradient-to-br from-orange-100 to-rose-100 rounded-3xl p-8 border border-orange-200/50 card-hover animate-fadeInUp" style={{animationDelay: '0.45s'}}>
-          <div className="flex items-start gap-4">
-            <div className="w-14 h-14 bg-white/80 rounded-2xl flex items-center justify-center flex-shrink-0 animate-float">
-              <Sparkles className="w-7 h-7 text-orange-600" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-sm uppercase tracking-wider text-orange-700 mb-2 font-medium" style={{fontFamily: 'Work Sans, sans-serif'}}>
-                AI-Powered Biomarker Analysis
-              </h3>
-              <h4 className="text-2xl text-amber-900 mb-2 font-semibold" style={{fontFamily: 'Spectral, serif'}}>
-                {placesQuery?.recommendation?.title}
-              </h4>
-              <p className="text-sm text-rose-700 mb-2 font-medium" style={{fontFamily: 'Work Sans, sans-serif'}}>
-                Detected: {recommendation.profile.primaryStressor}
-              </p>
-              <p className="text-amber-800 leading-relaxed font-light" style={{fontFamily: 'Work Sans, sans-serif'}}>
-                {recommendation.profile.reasoning}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {hasAI && (
-        <div className="animate-fadeInUp" style={{animationDelay: '0.5s'}}>
-          <h3 className="text-lg font-semibold text-amber-900 mb-3 flex items-center gap-2" style={{fontFamily: 'Spectral, serif'}}>
-            <MapPin className="w-5 h-5 text-orange-600" />
-            Recommended Venues Near You
-          </h3>
-          <div
-            ref={mapRef}
-            className="w-full h-64 rounded-2xl border border-orange-200/50 mb-4"
-            style={{ minHeight: '250px' }}
-          />
-          {venueLoading && (
-            <div className="flex items-center justify-center gap-2 py-4 text-amber-700">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <span style={{fontFamily: 'Work Sans, sans-serif'}}>Finding venues for you...</span>
-            </div>
-          )}
-          {venueResults.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {venueResults.map(place => (
-                <div key={place.place_id} className="bg-white/60 rounded-2xl p-4 border border-orange-100 card-hover">
-                  <h4 className="text-sm font-semibold text-amber-900 mb-1" style={{fontFamily: 'Work Sans, sans-serif'}}>
-                    {place.name}
-                  </h4>
-                  <p className="text-xs text-amber-700 mb-1">{place.vicinity}</p>
-                  <div className="flex items-center gap-1">
-                    <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
-                    <span className="text-xs text-amber-600">{place.rating || 'N/A'}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {!hasAI && (
-        <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl p-8 border border-amber-200/50 text-center animate-fadeInUp" style={{animationDelay: '0.45s'}}>
-          <Sparkles className="w-10 h-10 text-amber-400 mx-auto mb-3" />
-          <h3 className="text-lg text-amber-900 mb-2 font-semibold" style={{fontFamily: 'Spectral, serif'}}>
-            Personalize These Suggestions
-          </h3>
-          <p className="text-sm text-amber-700" style={{fontFamily: 'Work Sans, sans-serif'}}>
-            Upload a biomarker PDF report in the Upload tab for AI-powered recommendations tailored to your unique physiology.
-          </p>
-        </div>
-      )}
-
-      <div className="bg-gradient-to-br from-rose-100/80 to-orange-100/80 rounded-3xl p-8 border border-rose-200/50 card-hover animate-fadeInUp" style={{animationDelay: '0.5s'}}>
+      <div className="bg-gradient-to-br from-rose-100/80 to-orange-100/80 rounded-3xl p-8 border border-rose-200/50 card-hover animate-fadeInUp" style={{animationDelay: '0.55s'}}>
         <div className="flex items-start gap-4">
           <div className="w-14 h-14 bg-white/80 rounded-2xl flex items-center justify-center flex-shrink-0 animate-float">
             <Leaf className="w-7 h-7 text-rose-600" />
           </div>
           <div className="flex-1">
             <h3 className="text-sm uppercase tracking-wider text-rose-700 mb-2 font-medium" style={{fontFamily: 'Work Sans, sans-serif'}}>
-              {hasAI ? 'Your Personalized Micro-Practice' : "Today's Micro-Practice"}
+              Today's Micro-Practice
             </h3>
             <p className="text-2xl text-amber-900 font-light leading-relaxed" style={{fontFamily: 'Spectral, serif'}}>
               {microPractice}
@@ -367,12 +339,7 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
               <span className="text-sm font-medium text-orange-600" style={{fontFamily: 'Work Sans, sans-serif'}}>
                 {activityTime}
               </span>
-              {hasAI && (
-                <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full" style={{fontFamily: 'Work Sans, sans-serif'}}>
-                  AI Recommended
-                </span>
-              )}
-              {activityPlace && !hasAI && (
+              {activityPlace && (
                 <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full" style={{fontFamily: 'Work Sans, sans-serif'}}>
                   Near You
                 </span>
@@ -411,12 +378,7 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
               <h3 className="text-lg font-semibold text-amber-900" style={{fontFamily: 'Spectral, serif'}}>
                 Nourishment Suggestion
               </h3>
-              {hasAI && (
-                <span className="text-xs bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full" style={{fontFamily: 'Work Sans, sans-serif'}}>
-                  AI Recommended
-                </span>
-              )}
-              {mealPlace && !hasAI && (
+              {mealPlace && (
                 <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full" style={{fontFamily: 'Work Sans, sans-serif'}}>
                   Near You
                 </span>
@@ -460,12 +422,7 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
               <h3 className="text-lg font-semibold text-amber-900" style={{fontFamily: 'Spectral, serif'}}>
                 Shopping Suggestion
               </h3>
-              {hasAI && (
-                <span className="text-xs bg-rose-200 text-rose-800 px-2 py-0.5 rounded-full" style={{fontFamily: 'Work Sans, sans-serif'}}>
-                  AI Recommended
-                </span>
-              )}
-              {groceryPlace && !hasAI && (
+              {groceryPlace && (
                 <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full" style={{fontFamily: 'Work Sans, sans-serif'}}>
                   Near You
                 </span>
@@ -511,13 +468,10 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
               Why This Matters
             </h3>
             <h4 className="text-xl text-amber-900 mb-2 font-semibold" style={{fontFamily: 'Spectral, serif'}}>
-              {hasAI ? 'Personalized for Your Biology' : 'Building Longevity Through Daily Choices'}
+              Building Longevity Through Daily Choices
             </h4>
-            <p className="text-amber-800 leading-relaxed font-light line-clamp-3" style={{fontFamily: 'Work Sans, sans-serif'}}>
-              {hasAI
-                ? `These recommendations are tailored to your biomarker profile showing ${recommendation.profile.primaryStressor.toLowerCase()}. The activity, meal, and grocery suggestions work together to address your specific physiological needs.`
-                : "These aren't just random suggestions—they're based on longevity research and real venues near you. Low-impact movement preserves your joints, anti-inflammatory foods reduce cellular aging, and micro-practices build consistency without overwhelm."
-              }
+            <p className="text-amber-800 leading-relaxed font-light" style={{fontFamily: 'Work Sans, sans-serif'}}>
+              These aren't just random suggestions—they're based on longevity research. Low-impact movement preserves your joints, anti-inflammatory foods reduce cellular aging, and micro-practices build consistency without overwhelm. You're not training for a marathon; you're building a life that lasts.
             </p>
           </div>
         </div>
