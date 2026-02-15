@@ -36,8 +36,8 @@ function TrajectoryMiniChart({ sessionData, label, color, bgGradient }) {
         <AreaChart data={data}>
           <defs>
             <linearGradient id={`grad-${label.replace(/\s/g,'')}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity={0.3} />
-              <stop offset="100%" stopColor={color} stopOpacity={0.05} />
+              <stop offset="0%" stopColor={color} stopOpacity={0.45} />
+              <stop offset="100%" stopColor={color} stopOpacity={0.1} />
             </linearGradient>
           </defs>
           <XAxis dataKey="session" tick={false} axisLine={false} tickLine={false} hide />
@@ -132,23 +132,6 @@ export default function MessagingPortal({ matchedUser, sessionData, onBack, curr
 
   return (
     <div className="space-y-4 animate-fadeInUp">
-      <div className="flex justify-center gap-2 mb-2">
-        {SESSION_LIST.map(s => (
-          <button
-            key={s.key}
-            onClick={() => setCurrentSession(s.key)}
-            title={s.fullLabel}
-            className={`px-3.5 py-2 rounded-full text-sm font-medium transition-all ${
-              currentSession === s.key
-                ? 'bg-amber-600 text-white'
-                : 'bg-white/60 text-amber-700 hover:bg-white/80'
-            }`}
-          >
-            {s.label}
-          </button>
-        ))}
-      </div>
-
       <div className="bg-gradient-to-r from-purple-100/80 to-rose-100/80 rounded-3xl p-5 border border-purple-200/50">
         <div className="flex items-center gap-4 mb-1">
           <div className="w-12 h-12 bg-gradient-to-br from-purple-200 to-rose-200 rounded-2xl flex items-center justify-center text-xl">
