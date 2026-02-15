@@ -115,14 +115,41 @@ function MiniMap({ place }) {
   const markerInstance = useRef(null);
 
   useEffect(() => {
-    if (!ref.current || !window.google || !place?.geometry?.location) return;
+    console.log('🗺️ MiniMap useEffect triggered', { 
+      hasPlace: !!place, 
+      placeName: place?.name,
+      hasGeometry: !!place?.geometry?.location 
+    });
+
+    if (!ref.current || !window.google || !place?.geometry?.location) {
+      console.log('⏸️ MiniMap skipping - missing requirements');
+      return;
+    }
 
     const pos = {
-      lat: typeof place.geometry.location.lat === 'function' ? place.geometry.location.lat() : place.geometry.location.lat,
-      lng: typeof place.geometry.location.lng === 'function' ? place.geometry.location.lng() : place.geometry.location.lng,
+      lat: typeof place.geometry.location.lat === 'function' 
+        ? place.geometry.location.lat() 
+        : place.geometry.location.lat,
+      lng: typeof place.geometry.location.lng === 'function' 
+        ? place.geometry.location.lng() 
+        : place.geometry.location.lng,
     };
 
-    if (!mapInstance.current) {
+    console.log('📍 MiniMap rendering', { pos, placeName: place.name });
+
+    // Always recreate the map when place changes to ensure clean state
+    if (mapInstance.current) {
+      // Clean up old marker
+      if (markerInstance.current) {
+        markerInstance.current.setMap(null);
+        markerInstance.current = null;
+      }
+      
+      // Update existing map
+      mapInstance.current.setCenter(pos);
+      mapInstance.current.setZoom(15);
+    } else {
+      // Create new map
       mapInstance.current = new window.google.maps.Map(ref.current, {
         center: pos,
         zoom: 15,
@@ -136,19 +163,32 @@ function MiniMap({ place }) {
           { featureType: 'water', stylers: [{ color: '#d4e4f7' }] },
         ],
       });
-    } else {
-      mapInstance.current.setCenter(pos);
     }
 
-    if (markerInstance.current) markerInstance.current.setMap(null);
+    // Create new marker
     markerInstance.current = new window.google.maps.Marker({
       position: pos,
       map: mapInstance.current,
       title: place.name,
     });
-  }, [place]);
 
-  if (!place?.geometry?.location) return null;
+    console.log('✅ MiniMap marker created for', place.name);
+
+  }, [place]); // This dependency should trigger when place changes
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (markerInstance.current) {
+        markerInstance.current.setMap(null);
+      }
+    };
+  }, []);
+
+  if (!place?.geometry?.location) {
+    console.log('🚫 MiniMap not rendering - no place data');
+    return null;
+  }
 
   return (
     <div
