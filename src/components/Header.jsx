@@ -18,7 +18,7 @@ export default function Header({ onProfileClick }) {
 
   return (
     <div className="relative text-center mb-8 animate-fadeInUp" style={{animationDelay: '0.1s'}}>
-      <div className="absolute top-0 right-0" ref={dropdownRef}>
+      <div className="absolute top-0 right-0 z-50" ref={dropdownRef}>
         <button
           onClick={() => setShowDropdown(!showDropdown)}
           className="focus:outline-none focus:ring-2 focus:ring-amber-400 rounded-full transition-transform hover:scale-105"
