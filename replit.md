@@ -45,6 +45,10 @@ A React + Vite frontend application that analyzes biomarker data from PDFs and h
 - Google Maps JavaScript API used directly (not via wrapper)
 
 ## Recent Changes
+- 2026-02-15: Added mini Google Maps to each suggestion card showing venue location with marker
+- 2026-02-15: Added "Discover Something New" shuffle button to randomize recommendations from Google Places results
+- 2026-02-15: Removed "Save Spot" button per user request
+- 2026-02-15: Extended Google Places to store up to 10 results per category for shuffle cycling
 - 2026-02-15: Complete frontend overhaul with new component structure
 - 2026-02-15: Added Tailwind CSS v4 with custom animations (fadeInUp, float)
 - 2026-02-15: Integrated PDF upload with bem.ai analysis pipeline

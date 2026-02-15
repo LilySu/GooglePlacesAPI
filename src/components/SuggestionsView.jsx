@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Leaf, Calendar, Heart, Sprout, Sparkles, MapPin, Star, Loader2 } from 'lucide-react';
+import { Leaf, Calendar, Heart, Sprout, Sparkles, MapPin, Star, Loader2, Shuffle } from 'lucide-react';
 import { suggestions as staticSuggestions } from '../data/suggestions';
 
 let googleMapsPromise = null;
@@ -19,13 +19,67 @@ function loadGoogleMapsOnce() {
   return googleMapsPromise;
 }
 
+function MiniMap({ place }) {
+  const ref = useRef(null);
+  const mapInstance = useRef(null);
+  const markerInstance = useRef(null);
+
+  useEffect(() => {
+    if (!ref.current || !window.google || !place?.geometry?.location) return;
+
+    const pos = {
+      lat: typeof place.geometry.location.lat === 'function' ? place.geometry.location.lat() : place.geometry.location.lat,
+      lng: typeof place.geometry.location.lng === 'function' ? place.geometry.location.lng() : place.geometry.location.lng,
+    };
+
+    if (!mapInstance.current) {
+      mapInstance.current = new window.google.maps.Map(ref.current, {
+        center: pos,
+        zoom: 15,
+        disableDefaultUI: true,
+        zoomControl: false,
+        draggable: false,
+        scrollwheel: false,
+        styles: [
+          { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+          { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+          { featureType: 'water', stylers: [{ color: '#d4e4f7' }] },
+        ],
+      });
+    } else {
+      mapInstance.current.setCenter(pos);
+    }
+
+    if (markerInstance.current) markerInstance.current.setMap(null);
+    markerInstance.current = new window.google.maps.Marker({
+      position: pos,
+      map: mapInstance.current,
+      title: place.name,
+    });
+  }, [place]);
+
+  if (!place?.geometry?.location) return null;
+
+  return (
+    <div
+      ref={ref}
+      className="w-full h-36 rounded-xl border border-orange-200/30 mt-3"
+      style={{ minHeight: '144px' }}
+    />
+  );
+}
+
 export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis, sessionData }) {
   const [venueResults, setVenueResults] = useState([]);
   const [venueLoading, setVenueLoading] = useState(false);
-  const [activityPlace, setActivityPlace] = useState(null);
-  const [mealPlace, setMealPlace] = useState(null);
-  const [groceryPlace, setGroceryPlace] = useState(null);
+  const [activityResults, setActivityResults] = useState([]);
+  const [mealResults, setMealResults] = useState([]);
+  const [groceryResults, setGroceryResults] = useState([]);
+  const [activityIdx, setActivityIdx] = useState(0);
+  const [mealIdx, setMealIdx] = useState(0);
+  const [groceryIdx, setGroceryIdx] = useState(0);
   const [placesReady, setPlacesReady] = useState(false);
+  const [shuffling, setShuffling] = useState(false);
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markersRef = useRef([]);
@@ -47,27 +101,34 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
   const groceryMeta = hasAI ? profile.grocery : staticDay.grocery;
   const microPractice = hasAI ? (profile.microPractice || staticDay.microPractice) : staticDay.microPractice;
 
+  const activityPlace = activityResults[activityIdx] || null;
+  const mealPlace = mealResults[mealIdx] || null;
+  const groceryPlace = groceryResults[groceryIdx] || null;
+
   const getLocation = useCallback(() => {
     if (placesQuery?.query?.location) return placesQuery.query.location;
     return { lat: 37.7749, lng: -122.4194 };
   }, [placesQuery]);
 
-  const searchPlace = useCallback((service, keyword, location, setter) => {
+  const searchPlaces = useCallback((service, keyword, location, setter) => {
     if (!keyword) return;
     service.nearbySearch(
       { location, radius: 8000, keyword },
       (results, status) => {
         if (status === window.google.maps.places.PlacesServiceStatus.OK && results?.length) {
-          setter(results[0]);
+          setter(results.slice(0, 10));
         }
       }
     );
   }, []);
 
   useEffect(() => {
-    setActivityPlace(null);
-    setMealPlace(null);
-    setGroceryPlace(null);
+    setActivityResults([]);
+    setMealResults([]);
+    setGroceryResults([]);
+    setActivityIdx(0);
+    setMealIdx(0);
+    setGroceryIdx(0);
   }, [currentDay, hasAI]);
 
   useEffect(() => {
@@ -91,10 +152,10 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
 
     const service = placesServiceRef.current;
 
-    if (activitySearch) searchPlace(service, activitySearch, location, setActivityPlace);
-    if (mealSearch) searchPlace(service, mealSearch, location, setMealPlace);
-    if (grocerySearch) searchPlace(service, grocerySearch, location, setGroceryPlace);
-  }, [placesReady, activitySearch, mealSearch, grocerySearch, getLocation, searchPlace]);
+    if (activitySearch) searchPlaces(service, activitySearch, location, setActivityResults);
+    if (mealSearch) searchPlaces(service, mealSearch, location, setMealResults);
+    if (grocerySearch) searchPlaces(service, grocerySearch, location, setGroceryResults);
+  }, [placesReady, activitySearch, mealSearch, grocerySearch, getLocation, searchPlaces]);
 
   useEffect(() => {
     if (!hasAI || !placesReady || !placesQuery || !mapRef.current || !window.google) return;
@@ -138,6 +199,20 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
     );
   }, [hasAI, placesReady, placesQuery, getLocation]);
 
+  const handleShuffle = () => {
+    setShuffling(true);
+    const pickRandom = (arr, currentIdx) => {
+      if (arr.length <= 1) return 0;
+      let next;
+      do { next = Math.floor(Math.random() * arr.length); } while (next === currentIdx && arr.length > 1);
+      return next;
+    };
+    setActivityIdx(pickRandom(activityResults, activityIdx));
+    setMealIdx(pickRandom(mealResults, mealIdx));
+    setGroceryIdx(pickRandom(groceryResults, groceryIdx));
+    setTimeout(() => setShuffling(false), 400);
+  };
+
   const activityTitle = activityPlace ? activityPlace.name : activityMeta.title;
   const activityLocation = activityPlace ? activityPlace.vicinity : activityMeta.location;
   const activityRating = activityPlace?.rating;
@@ -154,27 +229,42 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
   const groceryRating = groceryPlace?.rating;
   const groceryWhy = groceryMeta.why;
 
+  const hasResults = activityResults.length > 0 || mealResults.length > 0 || groceryResults.length > 0;
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-center gap-3 mb-6 animate-fadeInUp" style={{animationDelay: '0.4s'}}>
-        {[
-          { key: 'day1', label: 'Today' },
-          { key: 'day2', label: 'Tomorrow' },
-          { key: 'day3', label: 'Day After' },
-        ].map(day => (
+      <div className="flex flex-col items-center gap-4 mb-6 animate-fadeInUp" style={{animationDelay: '0.4s'}}>
+        <div className="flex items-center gap-3">
+          {[
+            { key: 'day1', label: 'Today' },
+            { key: 'day2', label: 'Tomorrow' },
+            { key: 'day3', label: 'Day After' },
+          ].map(day => (
+            <button
+              key={day.key}
+              onClick={() => setCurrentDay(day.key)}
+              className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
+                currentDay === day.key
+                  ? 'bg-amber-600 text-white shadow-lg'
+                  : 'bg-white/60 text-amber-700 hover:bg-white/80'
+              }`}
+              style={{fontFamily: 'Work Sans, sans-serif'}}
+            >
+              {day.label}
+            </button>
+          ))}
+        </div>
+        {hasResults && (
           <button
-            key={day.key}
-            onClick={() => setCurrentDay(day.key)}
-            className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
-              currentDay === day.key
-                ? 'bg-amber-600 text-white shadow-lg'
-                : 'bg-white/60 text-amber-700 hover:bg-white/80'
-            }`}
+            onClick={handleShuffle}
+            disabled={shuffling}
+            className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-rose-500 text-white rounded-full text-sm font-medium hover:shadow-lg hover:scale-105 transition-all flex items-center gap-2 disabled:opacity-60"
             style={{fontFamily: 'Work Sans, sans-serif'}}
           >
-            {day.label}
+            <Shuffle className={`w-4 h-4 ${shuffling ? 'animate-spin' : ''}`} />
+            Discover Something New
           </button>
-        ))}
+        )}
       </div>
 
       {hasAI && (
@@ -276,55 +366,51 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
       </div>
 
       <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 border border-orange-200/50 card-hover animate-fadeInUp" style={{animationDelay: '0.6s'}}>
-        <div className="flex items-start justify-between gap-6">
-          <div className="flex items-start gap-4 flex-1">
-            <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-rose-400 rounded-full flex items-center justify-center flex-shrink-0">
-              <Calendar className="w-6 h-6 text-white" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-sm font-medium text-orange-600" style={{fontFamily: 'Work Sans, sans-serif'}}>
-                  {activityTime}
+        <div className="flex items-start gap-4 flex-1">
+          <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-rose-400 rounded-full flex items-center justify-center flex-shrink-0">
+            <Calendar className="w-6 h-6 text-white" />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-sm font-medium text-orange-600" style={{fontFamily: 'Work Sans, sans-serif'}}>
+                {activityTime}
+              </span>
+              {hasAI && (
+                <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full" style={{fontFamily: 'Work Sans, sans-serif'}}>
+                  AI Recommended
                 </span>
-                {hasAI && (
-                  <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full" style={{fontFamily: 'Work Sans, sans-serif'}}>
-                    AI Recommended
-                  </span>
-                )}
-                {activityPlace && !hasAI && (
-                  <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full" style={{fontFamily: 'Work Sans, sans-serif'}}>
-                    Near You
-                  </span>
-                )}
-              </div>
-              <h4 className="text-2xl text-amber-900 font-semibold mb-1" style={{fontFamily: 'Spectral, serif'}}>
-                {activityTitle}
-              </h4>
-              {activityPlace && (
-                <p className="text-xs text-orange-600 mb-1 font-medium" style={{fontFamily: 'Work Sans, sans-serif'}}>
-                  {hasAI ? `Suggested activity: ${activityMeta.title}` : `For: ${staticDay.activity.title}`}
-                </p>
               )}
-              <div className="flex items-center gap-2 mb-2">
-                <MapPin className="w-3 h-3 text-amber-500" />
-                <p className="text-sm text-amber-700" style={{fontFamily: 'Work Sans, sans-serif'}}>
-                  {activityLocation}
-                </p>
-              </div>
-              {activityRating && (
-                <div className="flex items-center gap-1 mb-2">
-                  <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
-                  <span className="text-xs text-amber-600">{activityRating}</span>
-                </div>
+              {activityPlace && !hasAI && (
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full" style={{fontFamily: 'Work Sans, sans-serif'}}>
+                  Near You
+                </span>
               )}
-              <p className="text-amber-800 font-light italic" style={{fontFamily: 'Work Sans, sans-serif'}}>
-                {activityBenefit}
+            </div>
+            <h4 className="text-2xl text-amber-900 font-semibold mb-1" style={{fontFamily: 'Spectral, serif'}}>
+              {activityTitle}
+            </h4>
+            {activityPlace && (
+              <p className="text-xs text-orange-600 mb-1 font-medium" style={{fontFamily: 'Work Sans, sans-serif'}}>
+                {hasAI ? `Suggested activity: ${activityMeta.title}` : `For: ${staticDay.activity.title}`}
+              </p>
+            )}
+            <div className="flex items-center gap-2 mb-2">
+              <MapPin className="w-3 h-3 text-amber-500" />
+              <p className="text-sm text-amber-700" style={{fontFamily: 'Work Sans, sans-serif'}}>
+                {activityLocation}
               </p>
             </div>
+            {activityRating && (
+              <div className="flex items-center gap-1 mb-2">
+                <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+                <span className="text-xs text-amber-600">{activityRating}</span>
+              </div>
+            )}
+            <p className="text-amber-800 font-light italic" style={{fontFamily: 'Work Sans, sans-serif'}}>
+              {activityBenefit}
+            </p>
+            <MiniMap place={activityPlace} />
           </div>
-          <button className="px-6 py-3 bg-gradient-to-r from-orange-500 to-rose-500 text-white rounded-full text-sm font-medium hover:shadow-lg transition-all whitespace-nowrap">
-            Save Spot
-          </button>
         </div>
       </div>
 
@@ -373,6 +459,7 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
           <p className="text-sm text-amber-800 font-light leading-relaxed" style={{fontFamily: 'Work Sans, sans-serif'}}>
             {mealWhy}
           </p>
+          <MiniMap place={mealPlace} />
         </div>
 
         <div className="bg-gradient-to-br from-rose-100 to-orange-100 rounded-3xl p-6 border border-rose-200/50 card-hover">
@@ -419,6 +506,7 @@ export default function SuggestionsView({ currentDay, setCurrentDay, bemAnalysis
           <p className="text-sm text-amber-800 font-light leading-relaxed" style={{fontFamily: 'Work Sans, sans-serif'}}>
             {groceryWhy}
           </p>
+          <MiniMap place={groceryPlace} />
         </div>
       </div>
 
