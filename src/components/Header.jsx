@@ -17,7 +17,7 @@ export default function Header({ onProfileClick }) {
   }, []);
 
   return (
-    <div className="relative text-center mb-8 animate-fadeInUp" style={{animationDelay: '0.1s'}}>
+    <div className="relative text-center mb-8 animate-fadeInUp" style={{animationDelay: '0.1s', zIndex: 100}}>
       <div className="absolute top-0 right-0 z-50" ref={dropdownRef}>
         <button
           onClick={() => setShowDropdown(!showDropdown)}
