@@ -162,10 +162,10 @@ export default function MessagingPortal({ matchedUser, sessionData, onBack, curr
           </div>
           <button
             onClick={onBack}
-            className="flex items-center gap-1.5 text-xs text-purple-600 hover:text-purple-800 transition-colors font-medium bg-white/60 px-3 py-1.5 rounded-full"
+            className="flex items-center gap-1.5 text-sm text-white font-semibold bg-gradient-to-r from-fuchsia-500 to-purple-600 px-4 py-2 rounded-full hover:shadow-lg hover:scale-105 transition-all"
             style={{fontFamily: 'Work Sans, sans-serif'}}
           >
-            <ArrowLeft className="w-3 h-3" />
+            <ArrowLeft className="w-4 h-4" />
             Back
           </button>
         </div>
@@ -181,7 +181,7 @@ export default function MessagingPortal({ matchedUser, sessionData, onBack, curr
         <TrajectoryMiniChart
           sessionData={matchedUser.sessionData}
           label={`${matchedUser.name}'s Journey`}
-          color="#a855f7"
+          color="#c084fc"
           bgGradient="bg-purple-50/80 border-purple-200/50"
         />
       </div>

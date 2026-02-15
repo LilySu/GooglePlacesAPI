@@ -1,4 +1,4 @@
-import { ArrowLeft, Crown, CreditCard, Bell, Shield, User, Mail, Calendar, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Crown, CreditCard, User, Calendar, ChevronRight } from 'lucide-react';
 import userProfileImg from '@assets/anna-keibalo-FvISk7v55o8-unsplash_1771112533870_1771120987645.png';
 
 export default function ProfilePage({ onBack }) {
@@ -111,10 +111,7 @@ export default function ProfilePage({ onBack }) {
           Account Settings
         </h3>
         <SettingsRow icon={<User className="w-5 h-5 text-amber-600" />} label="Edit Profile" subtitle="Name, photo, bio" />
-        <SettingsRow icon={<Mail className="w-5 h-5 text-amber-600" />} label="Email Preferences" subtitle="jordan.mitchell@email.com" />
         <SettingsRow icon={<CreditCard className="w-5 h-5 text-amber-600" />} label="Billing & Payment" subtitle="No payment method on file" />
-        <SettingsRow icon={<Bell className="w-5 h-5 text-amber-600" />} label="Notifications" subtitle="Push, email, and in-app" />
-        <SettingsRow icon={<Shield className="w-5 h-5 text-amber-600" />} label="Privacy & Security" subtitle="Password, data sharing" />
         <SettingsRow icon={<Calendar className="w-5 h-5 text-amber-600" />} label="Connected Apps" subtitle="Google Fit, Apple Health" last />
       </div>
 

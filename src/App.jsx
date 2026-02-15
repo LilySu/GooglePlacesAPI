@@ -47,17 +47,18 @@ export default function App() {
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-rose-50 to-orange-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         <Header onProfileClick={handleOpenProfile} />
-        <LongevityScoreHero
-          longevityScore={longevityScore}
-          firstScore={firstScore}
-          lastScore={lastScore}
-          plantGrowth={plantGrowth}
-        />
 
         {showProfile ? (
           <ProfilePage onBack={handleCloseProfile} />
         ) : (
           <>
+            <LongevityScoreHero
+              longevityScore={longevityScore}
+              firstScore={firstScore}
+              lastScore={lastScore}
+              plantGrowth={plantGrowth}
+            />
+
             <Navigation currentView={currentView} setCurrentView={(view) => { setCurrentView(view); setShowChat(false); }} />
 
             {showChat ? (
