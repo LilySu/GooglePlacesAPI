@@ -313,23 +313,23 @@ export default function SuggestionsView({ currentDay, setCurrentDay, sessionData
         )}
       </div>
 
-      <div className="bg-gradient-to-br from-rose-100/80 to-orange-100/80 rounded-3xl p-8 border border-rose-200/50 card-hover animate-fadeInUp" style={{animationDelay: '0.55s'}}>
-        <div className="flex items-start gap-4">
-          <div className="w-14 h-14 bg-white/80 rounded-2xl flex items-center justify-center flex-shrink-0 animate-float">
-            <Leaf className="w-7 h-7 text-rose-600" />
+      <div className="bg-gradient-to-br from-rose-100/80 to-orange-100/80 rounded-3xl p-4 sm:p-6 md:p-8 border border-rose-200/50 card-hover animate-fadeInUp" style={{animationDelay: '0.55s'}}>
+        <div className="flex items-start gap-3 sm:gap-4">
+          <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white/80 rounded-2xl flex items-center justify-center flex-shrink-0 animate-float">
+            <Leaf className="w-5 h-5 sm:w-7 sm:h-7 text-rose-600" />
           </div>
           <div className="flex-1">
             <h3 className="text-sm uppercase tracking-wider text-rose-700 mb-2 font-medium" style={{fontFamily: 'Work Sans, sans-serif'}}>
               Today's Micro-Practice
             </h3>
-            <p className="text-2xl text-amber-900 font-light leading-relaxed" style={{fontFamily: 'Spectral, serif'}}>
+            <p className="text-lg sm:text-2xl text-amber-900 font-light leading-relaxed" style={{fontFamily: 'Spectral, serif'}}>
               {microPractice}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 border border-orange-200/50 card-hover animate-fadeInUp" style={{animationDelay: '0.6s'}}>
+      <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-4 sm:p-6 md:p-8 border border-orange-200/50 card-hover animate-fadeInUp" style={{animationDelay: '0.6s'}}>
         <div className="flex items-start gap-4 flex-1">
           <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-rose-400 rounded-full flex items-center justify-center flex-shrink-0">
             <Calendar className="w-6 h-6 text-white" />
@@ -368,8 +368,8 @@ export default function SuggestionsView({ currentDay, setCurrentDay, sessionData
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fadeInUp" style={{animationDelay: '0.7s'}}>
-        <div className="bg-gradient-to-br from-amber-100 to-orange-100 rounded-3xl p-6 border border-amber-200/50 card-hover flex flex-col">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 animate-fadeInUp" style={{animationDelay: '0.7s'}}>
+        <div className="bg-gradient-to-br from-amber-100 to-orange-100 rounded-3xl p-4 sm:p-6 border border-amber-200/50 card-hover flex flex-col">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center flex-shrink-0">
               <Heart className="w-5 h-5 text-amber-600" />
@@ -413,7 +413,7 @@ export default function SuggestionsView({ currentDay, setCurrentDay, sessionData
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-rose-100 to-orange-100 rounded-3xl p-6 border border-rose-200/50 card-hover flex flex-col">
+        <div className="bg-gradient-to-br from-rose-100 to-orange-100 rounded-3xl p-4 sm:p-6 border border-rose-200/50 card-hover flex flex-col">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center flex-shrink-0">
               <Sprout className="w-5 h-5 text-rose-600" />
@@ -458,8 +458,8 @@ export default function SuggestionsView({ currentDay, setCurrentDay, sessionData
         </div>
       </div>
 
-      <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 border border-amber-200/50 card-hover animate-fadeInUp" style={{animationDelay: '0.8s'}}>
-        <div className="flex items-start gap-4">
+      <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-4 sm:p-6 md:p-8 border border-amber-200/50 card-hover animate-fadeInUp" style={{animationDelay: '0.8s'}}>
+        <div className="flex items-start gap-3 sm:gap-4">
           <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-400 rounded-full flex items-center justify-center flex-shrink-0">
             <Sparkles className="w-6 h-6 text-white" />
           </div>

@@ -7,7 +7,7 @@ export default function LongevityScoreHero({ longevityScore, firstScore, lastSco
 
   return (
     <div className="mb-8 animate-fadeInUp" style={{animationDelay: '0.2s'}}>
-      <div className="bg-gradient-to-br from-orange-100 to-rose-100 rounded-3xl p-8 border border-orange-200/50 card-hover relative overflow-hidden">
+      <div className="bg-gradient-to-br from-orange-100 to-rose-100 rounded-3xl p-4 sm:p-6 md:p-8 border border-orange-200/50 card-hover relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-orange-300/20 to-rose-300/20 rounded-full blur-3xl" />
 
         <div className="relative flex flex-col md:flex-row items-center justify-between gap-8">
@@ -15,7 +15,7 @@ export default function LongevityScoreHero({ longevityScore, firstScore, lastSco
             <h3 className="text-sm uppercase tracking-wider text-orange-700 mb-2 font-medium" style={{fontFamily: 'Work Sans, sans-serif'}}>
               Your Total Longevity Score
             </h3>
-            <p className="text-7xl font-light text-amber-900 mb-2">
+            <p className="text-5xl sm:text-7xl font-light text-amber-900 mb-2">
               <span className="shimmer-text font-semibold">{longevityScore}</span>
               <span className="text-3xl text-amber-600">/100</span>
             </p>

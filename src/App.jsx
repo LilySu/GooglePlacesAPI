@@ -44,8 +44,8 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-rose-50 to-orange-50 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-rose-50 to-orange-50 px-3 py-4 md:p-8 overflow-x-hidden w-screen max-w-full">
+      <div className="max-w-7xl mx-auto w-full">
         <Header onProfileClick={handleOpenProfile} />
 
         {showProfile ? (

@@ -10,13 +10,13 @@ export default function DashboardView({ sessionData, currentSession, setCurrentS
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-center gap-2 mb-6 animate-fadeInUp" style={{animationDelay: '0.4s'}}>
+      <div className="flex justify-start sm:justify-center gap-2 mb-6 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1 animate-fadeInUp" style={{animationDelay: '0.4s', WebkitOverflowScrolling: 'touch'}}>
         {SESSION_LIST.map(s => (
           <button
             key={s.key}
             onClick={() => setCurrentSession(s.key)}
             title={s.fullLabel}
-            className={`px-3.5 py-2 rounded-full text-sm font-medium transition-all ${
+            className={`px-3 sm:px-3.5 py-2 rounded-full text-xs sm:text-sm font-medium transition-all whitespace-nowrap shrink-0 ${
               currentSession === s.key
                 ? 'bg-amber-600 text-white'
                 : 'bg-white/60 text-amber-700 hover:bg-white/80'
@@ -28,7 +28,7 @@ export default function DashboardView({ sessionData, currentSession, setCurrentS
       </div>
 
       <div className="animate-fadeInUp" style={{animationDelay: '0.5s'}}>
-        <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-6 border border-orange-200/50 card-hover">
+        <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-3 sm:p-6 border border-orange-200/50 card-hover">
           <h3 className="text-lg font-semibold text-amber-900 mb-4" style={{fontFamily: 'Spectral, serif'}}>
             Look How Far You've Come! 📈
           </h3>
@@ -60,7 +60,7 @@ export default function DashboardView({ sessionData, currentSession, setCurrentS
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-fadeInUp" style={{animationDelay: '0.6s'}}>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 animate-fadeInUp" style={{animationDelay: '0.6s'}}>
         <MetricCard
           icon={<Activity className="w-6 h-6 text-orange-600 mb-2" />}
           label="Plank Hold"
@@ -105,16 +105,16 @@ export default function DashboardView({ sessionData, currentSession, setCurrentS
         onOpenChat={onOpenChat}
       />
 
-      <div className="bg-gradient-to-br from-rose-100/80 to-orange-100/80 rounded-3xl p-8 border border-rose-200/50 card-hover animate-fadeInUp" style={{animationDelay: '0.7s'}}>
-        <div className="flex items-start gap-4">
-          <div className="w-14 h-14 bg-white/80 rounded-2xl flex items-center justify-center flex-shrink-0 animate-float">
-            <Sparkles className="w-7 h-7 text-orange-600" />
+      <div className="bg-gradient-to-br from-rose-100/80 to-orange-100/80 rounded-3xl p-4 sm:p-6 md:p-8 border border-rose-200/50 card-hover animate-fadeInUp" style={{animationDelay: '0.7s'}}>
+        <div className="flex items-start gap-3 sm:gap-4">
+          <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white/80 rounded-2xl flex items-center justify-center flex-shrink-0 animate-float">
+            <Sparkles className="w-5 h-5 sm:w-7 sm:h-7 text-orange-600" />
           </div>
           <div>
             <h3 className="text-sm uppercase tracking-wider text-orange-700 mb-2 font-medium" style={{fontFamily: 'Work Sans, sans-serif'}}>
               Your Progress Story
             </h3>
-            <p className="text-2xl text-amber-900 font-light leading-relaxed" style={{fontFamily: 'Spectral, serif'}}>
+            <p className="text-lg sm:text-2xl text-amber-900 font-light leading-relaxed" style={{fontFamily: 'Spectral, serif'}}>
               Over {TOTAL_DAYS} days, your plank hold nearly doubled from {sessionData[FIRST_SESSION].plankHold}s to {sessionData[LAST_SESSION].plankHold}s—like a steady oak growing stronger! Your wellbeing jumped from {sessionData[FIRST_SESSION].wellbeing} to {sessionData[LAST_SESSION].wellbeing}, and your foot pain decreased from {sessionData[FIRST_SESSION].footPainLevel} to {sessionData[LAST_SESSION].footPainLevel}. Every session, you're building a foundation for decades of vibrant living. 🌳
             </p>
           </div>
@@ -126,12 +126,12 @@ export default function DashboardView({ sessionData, currentSession, setCurrentS
 
 function MetricCard({ icon, label, value, unit, progress, gradient, textColor }) {
   return (
-    <div className={`bg-gradient-to-br ${gradient} rounded-2xl p-5 card-hover`}>
+    <div className={`bg-gradient-to-br ${gradient} rounded-2xl p-3 sm:p-5 card-hover`}>
       {icon}
       <p className={`text-xs ${textColor} mb-1 font-medium`} style={{fontFamily: 'Work Sans, sans-serif'}}>
         {label}
       </p>
-      <p className="text-2xl font-light text-amber-900">
+      <p className="text-xl sm:text-2xl font-light text-amber-900">
         {value}<span className="text-sm text-amber-600">{unit}</span>
       </p>
       <p className="text-xs text-green-600 mt-1">+{progress}%</p>

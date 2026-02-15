@@ -53,6 +53,7 @@ A React + Vite frontend application that recommends personalized wellness venues
 - Google Maps JavaScript API used directly (not via wrapper)
 
 ## Recent Changes
+- 2026-02-15: Full mobile-responsive refactor - flexible header, scrollable tabs, responsive padding/typography across all components
 - 2026-02-15: ProfilePage simplified to Edit Profile, Billing & Payment, Connected Apps; hidden longevity score when profile open
 - 2026-02-15: Profile photo dropdown with Settings/Logout positioned below header
 - 2026-02-15: Navigation and session buttons persist when viewing MessagingPortal chat

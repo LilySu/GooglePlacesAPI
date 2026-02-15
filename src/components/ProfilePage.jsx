@@ -13,15 +13,15 @@ export default function ProfilePage({ onBack }) {
         Back
       </button>
 
-      <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 border border-orange-200/50">
-        <div className="flex items-center gap-5 mb-6">
+      <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-4 sm:p-6 md:p-8 border border-orange-200/50">
+        <div className="flex items-center gap-3 sm:gap-5 mb-6">
           <img
             src={userProfileImg}
             alt="Profile"
-            className="w-20 h-20 rounded-full object-cover border-3 border-amber-300/60 shadow-md"
+            className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-3 border-amber-300/60 shadow-md"
           />
-          <div>
-            <h2 className="text-2xl font-semibold text-amber-900" style={{fontFamily: 'Spectral, serif'}}>
+          <div className="min-w-0">
+            <h2 className="text-xl sm:text-2xl font-semibold text-amber-900" style={{fontFamily: 'Spectral, serif'}}>
               Jordan Mitchell
             </h2>
             <p className="text-sm text-amber-600" style={{fontFamily: 'Work Sans, sans-serif'}}>
@@ -33,23 +33,23 @@ export default function ProfilePage({ onBack }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 mb-2">
-          <div className="bg-amber-50 rounded-2xl p-4 text-center">
-            <p className="text-2xl font-semibold text-amber-900">5</p>
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-2">
+          <div className="bg-amber-50 rounded-2xl p-3 sm:p-4 text-center">
+            <p className="text-xl sm:text-2xl font-semibold text-amber-900">5</p>
             <p className="text-xs text-amber-600" style={{fontFamily: 'Work Sans, sans-serif'}}>Sessions</p>
           </div>
-          <div className="bg-amber-50 rounded-2xl p-4 text-center">
-            <p className="text-2xl font-semibold text-amber-900">28</p>
+          <div className="bg-amber-50 rounded-2xl p-3 sm:p-4 text-center">
+            <p className="text-xl sm:text-2xl font-semibold text-amber-900">28</p>
             <p className="text-xs text-amber-600" style={{fontFamily: 'Work Sans, sans-serif'}}>Days Active</p>
           </div>
-          <div className="bg-amber-50 rounded-2xl p-4 text-center">
-            <p className="text-2xl font-semibold text-amber-900">87%</p>
+          <div className="bg-amber-50 rounded-2xl p-3 sm:p-4 text-center">
+            <p className="text-xl sm:text-2xl font-semibold text-amber-900">87%</p>
             <p className="text-xs text-amber-600" style={{fontFamily: 'Work Sans, sans-serif'}}>Match Score</p>
           </div>
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-amber-100 to-orange-100 rounded-3xl p-6 border border-amber-200/50">
+      <div className="bg-gradient-to-br from-amber-100 to-orange-100 rounded-3xl p-4 sm:p-6 border border-amber-200/50">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center">

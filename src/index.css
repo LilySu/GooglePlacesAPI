@@ -40,6 +40,14 @@
   box-shadow: 0 20px 40px rgba(180, 83, 9, 0.12);
 }
 
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 .shimmer-text {
   background: linear-gradient(90deg, #b45309 0%, #ea580c 50%, #b45309 100%);
   background-size: 200% auto;

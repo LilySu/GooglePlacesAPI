@@ -85,9 +85,9 @@ export default function MetricsView({ sessionData, currentSession }) {
       {metricSections.map(section => {
         const Icon = section.icon;
         return (
-          <div key={section.title} className={`bg-white/60 backdrop-blur-sm rounded-3xl p-8 border ${section.borderColor} card-hover`}>
-            <h3 className="text-2xl font-semibold text-amber-900 mb-6 flex items-center gap-3" style={{fontFamily: 'Spectral, serif'}}>
-              <Icon className={`w-7 h-7 ${section.iconColor}`} />
+          <div key={section.title} className={`bg-white/60 backdrop-blur-sm rounded-3xl p-4 sm:p-6 md:p-8 border ${section.borderColor} card-hover`}>
+            <h3 className="text-xl sm:text-2xl font-semibold text-amber-900 mb-4 sm:mb-6 flex items-center gap-3" style={{fontFamily: 'Spectral, serif'}}>
+              <Icon className={`w-6 h-6 sm:w-7 sm:h-7 ${section.iconColor}`} />
               {section.title}
             </h3>
             <div className={`grid ${section.gridCols} gap-4`}>
@@ -112,9 +112,9 @@ export default function MetricsView({ sessionData, currentSession }) {
         );
       })}
 
-      <div className="bg-gradient-to-br from-orange-100 to-rose-100 rounded-3xl p-8 border border-orange-200/50 card-hover">
-        <h3 className="text-2xl font-semibold text-amber-900 mb-6 flex items-center gap-3" style={{fontFamily: 'Spectral, serif'}}>
-          <Heart className="w-7 h-7 text-orange-600" />
+      <div className="bg-gradient-to-br from-orange-100 to-rose-100 rounded-3xl p-4 sm:p-6 md:p-8 border border-orange-200/50 card-hover">
+        <h3 className="text-xl sm:text-2xl font-semibold text-amber-900 mb-4 sm:mb-6 flex items-center gap-3" style={{fontFamily: 'Spectral, serif'}}>
+          <Heart className="w-6 h-6 sm:w-7 sm:h-7 text-orange-600" />
           Subjective Wellbeing
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

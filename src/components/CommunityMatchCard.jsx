@@ -17,7 +17,7 @@ export default function CommunityMatchCard({ matchedUser, sessionData, onOpenCha
   const overlayData = getOverlayData(sessionData, matchedUser.sessionData);
 
   return (
-    <div className="bg-gradient-to-br from-purple-50/80 via-rose-50/80 to-orange-50/80 backdrop-blur-sm rounded-3xl p-6 border border-purple-200/50 card-hover animate-fadeInUp" style={{animationDelay: '0.8s'}}>
+    <div className="bg-gradient-to-br from-purple-50/80 via-rose-50/80 to-orange-50/80 backdrop-blur-sm rounded-3xl p-4 sm:p-6 border border-purple-200/50 card-hover animate-fadeInUp" style={{animationDelay: '0.8s'}}>
       <div className="flex items-center gap-2 mb-4">
         <Users className="w-5 h-5 text-purple-600" />
         <h3 className="text-sm uppercase tracking-wider text-purple-700 font-medium" style={{fontFamily: 'Work Sans, sans-serif'}}>
@@ -25,16 +25,16 @@ export default function CommunityMatchCard({ matchedUser, sessionData, onOpenCha
         </h3>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-6">
+      <div className="flex flex-col md:flex-row gap-4 sm:gap-6">
         <div className="flex-1">
-          <div className="flex items-center gap-4 mb-3">
+          <div className="flex items-center gap-3 sm:gap-4 mb-3 flex-wrap sm:flex-nowrap">
             <img
               src={mayaProfileImg}
               alt={matchedUser.name}
-              className="w-20 h-20 rounded-2xl object-cover border-2 border-purple-200/60 shadow-sm"
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-purple-200/60 shadow-sm"
             />
-            <div>
-              <h4 className="text-lg font-semibold text-amber-900" style={{fontFamily: 'Spectral, serif'}}>
+            <div className="min-w-0">
+              <h4 className="text-base sm:text-lg font-semibold text-amber-900" style={{fontFamily: 'Spectral, serif'}}>
                 {matchedUser.name}
               </h4>
               <div className="flex items-center gap-1 text-sm text-amber-600">
@@ -42,7 +42,7 @@ export default function CommunityMatchCard({ matchedUser, sessionData, onOpenCha
                 {matchedUser.distance}
               </div>
             </div>
-            <div className="ml-auto bg-gradient-to-r from-purple-500 to-rose-500 text-white rounded-full px-3 py-1 text-sm font-semibold">
+            <div className="sm:ml-auto bg-gradient-to-r from-purple-500 to-rose-500 text-white rounded-full px-3 py-1 text-xs sm:text-sm font-semibold whitespace-nowrap">
               {matchedUser.similarityScore}% match
             </div>
           </div>
