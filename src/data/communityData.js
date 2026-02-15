@@ -13,7 +13,15 @@ export const matchedUser = {
       sunSalAConfidence: 3, sunSalBConfidence: 2, sunSalAFlow: 3, sunSalBFlow: 2,
       bodyAwareness: 4, movementConfidence: 3, energyLevel: 4, wellbeing: 4
     },
-    session6: {
+    session2: {
+      plankHold: 16, sidePlankL: 9, sidePlankR: 10, boatPose: 11, deadBugQuality: 5,
+      downwardDog: 20, chaturangaQuality: 4, handFloorConnection: 4,
+      singleLegL: 12, singleLegR: 14, treePoseL: 11, treePoseR: 13, eyesClosedBalance: 4,
+      footPainLevel: 6, weightDistribution: 46, archEngagement: 4,
+      sunSalAConfidence: 4, sunSalBConfidence: 3, sunSalAFlow: 4, sunSalBFlow: 3,
+      bodyAwareness: 5, movementConfidence: 4, energyLevel: 5, wellbeing: 5
+    },
+    session3: {
       plankHold: 22, sidePlankL: 14, sidePlankR: 15, boatPose: 16, deadBugQuality: 6,
       downwardDog: 28, chaturangaQuality: 5, handFloorConnection: 5,
       singleLegL: 18, singleLegR: 20, treePoseL: 16, treePoseR: 18, eyesClosedBalance: 7,
@@ -21,7 +29,15 @@ export const matchedUser = {
       sunSalAConfidence: 5, sunSalBConfidence: 4, sunSalAFlow: 5, sunSalBFlow: 4,
       bodyAwareness: 6, movementConfidence: 5, energyLevel: 6, wellbeing: 6
     },
-    session12: {
+    session4: {
+      plankHold: 28, sidePlankL: 18, sidePlankR: 20, boatPose: 20, deadBugQuality: 7,
+      downwardDog: 35, chaturangaQuality: 6, handFloorConnection: 6,
+      singleLegL: 23, singleLegR: 25, treePoseL: 19, treePoseR: 22, eyesClosedBalance: 10,
+      footPainLevel: 4, weightDistribution: 49, archEngagement: 6,
+      sunSalAConfidence: 6, sunSalBConfidence: 5, sunSalAFlow: 6, sunSalBFlow: 5,
+      bodyAwareness: 7, movementConfidence: 6, energyLevel: 7, wellbeing: 7
+    },
+    session5: {
       plankHold: 35, sidePlankL: 22, sidePlankR: 24, boatPose: 25, deadBugQuality: 8,
       downwardDog: 42, chaturangaQuality: 7, handFloorConnection: 7,
       singleLegL: 28, singleLegR: 30, treePoseL: 22, treePoseR: 25, eyesClosedBalance: 12,

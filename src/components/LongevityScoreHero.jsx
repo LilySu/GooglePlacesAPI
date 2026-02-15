@@ -1,5 +1,6 @@
 import { TrendingUp } from 'lucide-react';
 import GrowingPlant from './GrowingPlant';
+import { TOTAL_DAYS } from '../data/sessions';
 
 export default function LongevityScoreHero({ longevityScore, firstScore, lastScore, plantGrowth }) {
   const pointsGained = lastScore - firstScore;
@@ -21,7 +22,7 @@ export default function LongevityScoreHero({ longevityScore, firstScore, lastSco
             <div className="flex items-center gap-2 mb-4">
               <TrendingUp className="w-5 h-5 text-green-600" />
               <span className="text-lg text-green-600 font-medium" style={{fontFamily: 'Work Sans, sans-serif'}}>
-                +{pointsGained} points over 14 days
+                +{pointsGained} points over {TOTAL_DAYS} days
               </span>
             </div>
             <p className="text-xl text-amber-800 font-light italic" style={{fontFamily: 'Spectral, serif'}}>

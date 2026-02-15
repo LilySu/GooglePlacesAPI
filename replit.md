@@ -1,7 +1,7 @@
 # Embodied OS - Biomarker-Driven Venue Discovery
 
 ## Overview
-A React + Vite frontend application that analyzes biomarker data from PDFs and health reports, then recommends personalized venues using AI (bem.ai) and Google Maps. Includes a longevity tracking dashboard with Excel spreadsheet upload support and comprehensive metrics visualization.
+A React + Vite frontend application that recommends personalized wellness venues using Google Maps. Includes a longevity tracking dashboard with Excel spreadsheet upload support, 5-session progress tracking, biomarker alerts, and comprehensive metrics visualization.
 
 ## Project Architecture
 - **Framework**: React 19 with Vite 7
@@ -19,14 +19,19 @@ A React + Vite frontend application that analyzes biomarker data from PDFs and h
 - `attached_assets/` - Photo assets (profile images, food photos, exercise photos) aliased as @assets in Vite
 - `public/` - Static assets
 
+### Session System
+- 5 recorded sessions labeled as "X days ago" (28d, 21d, 14d, 7d, 1d ago)
+- Session keys: session1 through session5
+- Managed via `src/data/sessions.js` with SESSION_LIST, FIRST_SESSION, LAST_SESSION, TOTAL_DAYS exports
+
 ### Integration Flow
-1. PDF Upload → pdfScanner extracts text → bemClient analyzes with bem.ai → biomarkerAnalyzer maps to venue profile → Google Places search
-2. Excel Upload → spreadsheetParser processes data → updates session tracking metrics → dashboard visualization
+1. Excel Upload → spreadsheetParser processes data → updates session tracking metrics → dashboard visualization
+2. Google Places API → nearby venue search → suggestion cards with mini-maps
 
 ### Key Components
 - **App.jsx** - Main app with state management for sessions, analysis, view routing, and messaging
-- **UploadView** - Dual upload: PDF for AI analysis, Excel for session tracking
-- **SuggestionsView** - AI recommendations + Google Maps venue discovery + photo assets + static wellness suggestions
+- **UploadView** - Excel upload for session tracking data
+- **SuggestionsView** - Biomarker alerts + Google Maps venue discovery + photo assets + static wellness suggestions
 - **DashboardView** - Session comparison charts, progress tracking, and community match card
 - **CommunityMatchCard** - Wellness match with trajectory comparison chart and matched person photo
 - **MessagingPortal** - Chat interface with matched user, trajectory mini-charts, and message images
@@ -48,6 +53,7 @@ A React + Vite frontend application that analyzes biomarker data from PDFs and h
 - Google Maps JavaScript API used directly (not via wrapper)
 
 ## Recent Changes
+- 2026-02-15: Changed to 5 recorded sessions with "X days ago" labels (28d, 21d, 14d, 7d, 1d ago)
 - 2026-02-15: Added photo assets to suggestion cards (harvest bowl, purple potatoes) with aligned card layout
 - 2026-02-15: Added user profile photo to Header and matched person photo (Maya) to CommunityMatchCard
 - 2026-02-15: Created CommunityMatchCard with trajectory comparison chart and MessagingPortal for chat

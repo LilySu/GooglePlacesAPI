@@ -1,7 +1,7 @@
 import { Activity, Target, Zap, Heart, Sparkles, TrendingUp } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { calculateProgress, getProgressData } from '../utils/calculations';
-import { SESSION_LIST, FIRST_SESSION, LAST_SESSION } from '../data/sessions';
+import { SESSION_LIST, FIRST_SESSION, LAST_SESSION, TOTAL_DAYS } from '../data/sessions';
 import CommunityMatchCard from './CommunityMatchCard';
 import { matchedUser } from '../data/communityData';
 
@@ -115,7 +115,7 @@ export default function DashboardView({ sessionData, currentSession, setCurrentS
               Your Progress Story
             </h3>
             <p className="text-2xl text-amber-900 font-light leading-relaxed" style={{fontFamily: 'Spectral, serif'}}>
-              Your plank hold nearly doubled from {sessionData[FIRST_SESSION].plankHold}s to {sessionData[LAST_SESSION].plankHold}s—like a steady oak growing stronger! Your wellbeing jumped from {sessionData[FIRST_SESSION].wellbeing} to {sessionData[LAST_SESSION].wellbeing}, and your foot pain decreased from {sessionData[FIRST_SESSION].footPainLevel} to {sessionData[LAST_SESSION].footPainLevel}. Every session, you're building a foundation for decades of vibrant living. 🌳
+              Over {TOTAL_DAYS} days, your plank hold nearly doubled from {sessionData[FIRST_SESSION].plankHold}s to {sessionData[LAST_SESSION].plankHold}s—like a steady oak growing stronger! Your wellbeing jumped from {sessionData[FIRST_SESSION].wellbeing} to {sessionData[LAST_SESSION].wellbeing}, and your foot pain decreased from {sessionData[FIRST_SESSION].footPainLevel} to {sessionData[LAST_SESSION].footPainLevel}. Every session, you're building a foundation for decades of vibrant living. 🌳
             </p>
           </div>
         </div>
