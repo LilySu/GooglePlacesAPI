@@ -185,11 +185,13 @@ export default function SuggestionsView({ currentDay, setCurrentDay, sessionData
   const mealPlace = mealResults[mealIdx] || null;
   const groceryPlace = groceryResults[groceryIdx] || null;
 
-  const getLocation = useCallback(() => {
+  // FIXED: Removed useCallback - these don't need to be memoized
+  // and were causing stale closures in the useEffect
+  const getLocation = () => {
     return { lat: 37.7749, lng: -122.4194 };
-  }, []);
+  };
 
-  const searchPlaces = useCallback((service, keyword, location, setter) => {
+  const searchPlaces = (service, keyword, location, setter) => {
     if (!keyword) return;
     service.nearbySearch(
       { location, radius: 8000, keyword },
@@ -199,7 +201,7 @@ export default function SuggestionsView({ currentDay, setCurrentDay, sessionData
         }
       }
     );
-  }, []);
+  };
 
   useEffect(() => {
     const run = async () => {
@@ -210,7 +212,12 @@ export default function SuggestionsView({ currentDay, setCurrentDay, sessionData
     run();
   }, []);
 
+  // FIXED: Simplified dependencies - removed getLocation and searchPlaces
+  // since they're now regular functions defined in the component scope
   useEffect(() => {
+    console.log('Places search effect triggered for day:', currentDay); // Debug log
+    
+    // Reset state when day changes
     setActivityResults([]);
     setMealResults([]);
     setGroceryResults([]);
@@ -218,7 +225,10 @@ export default function SuggestionsView({ currentDay, setCurrentDay, sessionData
     setMealIdx(0);
     setGroceryIdx(0);
 
-    if (!placesReady || !window.google) return;
+    if (!placesReady || !window.google) {
+      console.log('Places not ready or Google not loaded'); // Debug log
+      return;
+    }
 
     const location = getLocation();
 
@@ -229,10 +239,12 @@ export default function SuggestionsView({ currentDay, setCurrentDay, sessionData
 
     const service = placesServiceRef.current;
 
+    console.log('Searching for:', { activitySearch, mealSearch, grocerySearch }); // Debug log
+
     if (activitySearch) searchPlaces(service, activitySearch, location, setActivityResults);
     if (mealSearch) searchPlaces(service, mealSearch, location, setMealResults);
     if (grocerySearch) searchPlaces(service, grocerySearch, location, setGroceryResults);
-  }, [currentDay, placesReady, activitySearch, mealSearch, grocerySearch, getLocation, searchPlaces]);
+  }, [currentDay, placesReady, activitySearch, mealSearch, grocerySearch]);
 
   const handleShuffle = () => {
     setShuffling(true);
