@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Leaf, Calendar, Heart, Sprout, Sparkles, MapPin, Star, Shuffle } from 'lucide-react';
 import { suggestions as staticSuggestions } from '../data/suggestions';
 import harvestBowlImg from '@assets/j-g-1yDF6qRULCY-unsplash_1771111819808_1771120987644.jpg';
@@ -168,6 +168,7 @@ export default function SuggestionsView({ currentDay, setCurrentDay, sessionData
   const [groceryIdx, setGroceryIdx] = useState(0);
   const [placesReady, setPlacesReady] = useState(false);
   const [shuffling, setShuffling] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const placesServiceRef = useRef(null);
 
   const staticDay = staticSuggestions[currentDay];
@@ -185,24 +186,6 @@ export default function SuggestionsView({ currentDay, setCurrentDay, sessionData
   const mealPlace = mealResults[mealIdx] || null;
   const groceryPlace = groceryResults[groceryIdx] || null;
 
-  // FIXED: Removed useCallback - these don't need to be memoized
-  // and were causing stale closures in the useEffect
-  const getLocation = () => {
-    return { lat: 37.7749, lng: -122.4194 };
-  };
-
-  const searchPlaces = (service, keyword, location, setter) => {
-    if (!keyword) return;
-    service.nearbySearch(
-      { location, radius: 8000, keyword },
-      (results, status) => {
-        if (status === window.google.maps.places.PlacesServiceStatus.OK && results?.length) {
-          setter(results.slice(0, 10));
-        }
-      }
-    );
-  };
-
   useEffect(() => {
     const run = async () => {
       await loadGoogleMapsOnce();
@@ -212,12 +195,14 @@ export default function SuggestionsView({ currentDay, setCurrentDay, sessionData
     run();
   }, []);
 
-  // FIXED: Simplified dependencies - removed getLocation and searchPlaces
-  // since they're now regular functions defined in the component scope
   useEffect(() => {
-    console.log('Places search effect triggered for day:', currentDay); // Debug log
-    
-    // Reset state when day changes
+    console.log('🔄 Search Effect Triggered', {
+      currentDay,
+      placesReady,
+      hasGoogle: !!window.google,
+      searches: { activitySearch, mealSearch, grocerySearch }
+    });
+
     setActivityResults([]);
     setMealResults([]);
     setGroceryResults([]);
@@ -226,11 +211,18 @@ export default function SuggestionsView({ currentDay, setCurrentDay, sessionData
     setGroceryIdx(0);
 
     if (!placesReady || !window.google) {
-      console.log('Places not ready or Google not loaded'); // Debug log
+      console.log('⏸️ Skipping search - not ready');
       return;
     }
 
-    const location = getLocation();
+    if (!activitySearch && !mealSearch && !grocerySearch) {
+      console.log('⚠️ No search keywords found!');
+      return;
+    }
+
+    setIsSearching(true);
+
+    const location = { lat: 37.7749, lng: -122.4194 };
 
     if (!placesServiceRef.current) {
       const attrDiv = document.createElement('div');
@@ -238,15 +230,67 @@ export default function SuggestionsView({ currentDay, setCurrentDay, sessionData
     }
 
     const service = placesServiceRef.current;
+    let completedSearches = 0;
+    const totalSearches = [activitySearch, mealSearch, grocerySearch].filter(Boolean).length;
 
-    console.log('Searching for:', { activitySearch, mealSearch, grocerySearch }); // Debug log
+    const onSearchComplete = () => {
+      completedSearches++;
+      console.log(`✅ Search ${completedSearches}/${totalSearches} complete`);
+      if (completedSearches === totalSearches) {
+        setIsSearching(false);
+      }
+    };
 
-    if (activitySearch) searchPlaces(service, activitySearch, location, setActivityResults);
-    if (mealSearch) searchPlaces(service, mealSearch, location, setMealResults);
-    if (grocerySearch) searchPlaces(service, grocerySearch, location, setGroceryResults);
+    if (activitySearch) {
+      console.log('🔍 Searching activity:', activitySearch);
+      service.nearbySearch(
+        { location, radius: 8000, keyword: activitySearch },
+        (results, status) => {
+          console.log('Activity search result:', status, results?.length || 0);
+          if (status === window.google.maps.places.PlacesServiceStatus.OK && results?.length) {
+            setActivityResults(results.slice(0, 10));
+          }
+          onSearchComplete();
+        }
+      );
+    }
+
+    if (mealSearch) {
+      console.log('🔍 Searching meal:', mealSearch);
+      service.nearbySearch(
+        { location, radius: 8000, keyword: mealSearch },
+        (results, status) => {
+          console.log('Meal search result:', status, results?.length || 0);
+          if (status === window.google.maps.places.PlacesServiceStatus.OK && results?.length) {
+            setMealResults(results.slice(0, 10));
+          }
+          onSearchComplete();
+        }
+      );
+    }
+
+    if (grocerySearch) {
+      console.log('🔍 Searching grocery:', grocerySearch);
+      service.nearbySearch(
+        { location, radius: 8000, keyword: grocerySearch },
+        (results, status) => {
+          console.log('Grocery search result:', status, results?.length || 0);
+          if (status === window.google.maps.places.PlacesServiceStatus.OK && results?.length) {
+            setGroceryResults(results.slice(0, 10));
+          }
+          onSearchComplete();
+        }
+      );
+    }
+
+    if (totalSearches === 0) {
+      setIsSearching(false);
+    }
+
   }, [currentDay, placesReady, activitySearch, mealSearch, grocerySearch]);
 
   const handleShuffle = () => {
+    console.log('🎲 Shuffle triggered');
     setShuffling(true);
     const pickRandom = (arr, currentIdx) => {
       if (arr.length <= 1) return 0;
@@ -280,6 +324,12 @@ export default function SuggestionsView({ currentDay, setCurrentDay, sessionData
 
   return (
     <div className="space-y-6">
+      {isSearching && (
+        <div className="fixed top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-50">
+          🔍 Searching places...
+        </div>
+      )}
+
       <div className="space-y-4 animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
         <h3 className="text-sm uppercase tracking-widest text-rose-600 font-semibold px-1" style={{ fontFamily: 'Work Sans, sans-serif' }}>
           Your Body This Month
@@ -298,7 +348,10 @@ export default function SuggestionsView({ currentDay, setCurrentDay, sessionData
           ].map(day => (
             <button
               key={day.key}
-              onClick={() => setCurrentDay(day.key)}
+              onClick={() => {
+                console.log('📅 Day button clicked:', day.key);
+                setCurrentDay(day.key);
+              }}
               className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
                 currentDay === day.key
                   ? 'bg-amber-600 text-white shadow-lg'
