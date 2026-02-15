@@ -110,12 +110,6 @@ function loadGoogleMapsOnce() {
   return googleMapsPromise;
 }
 
-
-// ============================================
-// MiniMap.jsx - Null-safe version
-// ============================================
-import { useRef, useEffect } from 'react';
-
 function MiniMap({ place }) {
   const ref = useRef(null);
   const mapInstance = useRef(null);
@@ -357,18 +351,18 @@ export default function SuggestionsView({ currentDay, setCurrentDay, sessionData
   const activityTitle = activityPlace?.name || activityMeta?.title || 'Activity';
   const activityLocation = activityPlace?.vicinity || activityMeta?.location || 'Location TBD';
   const activityRating = activityPlace?.rating;
-  const activityTime = activityMeta.time;
-  const activityBenefit = activityMeta.benefit;
+  const activityTime = activityMeta?.time || '';
+  const activityBenefit = activityMeta?.benefit || '';
 
-  const mealTitle = mealPlace ? mealPlace.name : (mealMeta.item || mealMeta.title);
-  const mealLocation = mealPlace ? mealPlace.vicinity : mealMeta.location;
+  const mealTitle = mealPlace?.name || mealMeta?.item || mealMeta?.title || 'Meal';
+  const mealLocation = mealPlace?.vicinity || mealMeta?.location || 'Location TBD';
   const mealRating = mealPlace?.rating;
-  const mealWhy = mealMeta.why;
+  const mealWhy = mealMeta?.why || '';
 
-  const groceryTitle = groceryPlace ? groceryPlace.name : (groceryMeta.item || groceryMeta.title);
-  const groceryLocation = groceryPlace ? groceryPlace.vicinity : groceryMeta.location;
+  const groceryTitle = groceryPlace?.name || groceryMeta?.item || groceryMeta?.title || 'Grocery';
+  const groceryLocation = groceryPlace?.vicinity || groceryMeta?.location || 'Location TBD';
   const groceryRating = groceryPlace?.rating;
-  const groceryWhy = groceryMeta.why;
+  const groceryWhy = groceryMeta?.why || '';
 
   const hasResults = activityResults.length > 0 || mealResults.length > 0 || groceryResults.length > 0;
 
